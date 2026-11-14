@@ -1073,6 +1073,22 @@ h1 > span {
 .svc-help .button {
   gap: 12px;
 }
+/* Touch screens: same colour feedback as hover, only while pressed. */
+@media (hover: none) {
+  .stat {
+    -webkit-tap-highlight-color: transparent;
+  }
+  .stat[data-pressed] {
+    border-color: var(--muted);
+  }
+  .stat[data-pressed]::after {
+    transform: scaleX(1);
+  }
+  .company-stats .stat[data-pressed] .stat-icon {
+    background: var(--brand-red);
+    color: #fff;
+  }
+}
 @media (hover: hover) {
   .stat:hover {
     border-color: var(--muted);
@@ -2215,7 +2231,8 @@ body:has(#mobile-nav) .smart-bar {
     transform: translateY(-1px);
   }
 }
-@media (min-width: 390px) {
+/* Supporting line only where it fits in full (no ellipsis). */
+@media (min-width: 440px) {
   .smart-bar-sub {
     display: block;
   }

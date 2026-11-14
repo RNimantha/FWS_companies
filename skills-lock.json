@@ -1,0 +1,353 @@
+{
+  "version": 2,
+  "skills": {
+    "ai-image-generator": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/design-assets/skills/ai-image-generator/SKILL.md",
+      "computedHash": "226e5257bcf16e44680a2a34c84f4be67a380c12e7f54cbd9f2e2eaf191da1d9"
+    },
+    "app-docs": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/dev-tools/skills/app-docs/SKILL.md",
+      "computedHash": "47be1d9e4eb9db8a98b260b923c9c81702cec1b2c8a2f63efa71b3b92a92efe1"
+    },
+    "aussie-business-english": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/writing/skills/aussie-business-english/SKILL.md",
+      "computedHash": "c75392d336398a5832826b55e06d9624957410ea7ec0938a06dcd108ab14629f"
+    },
+    "award-application": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/writing/skills/award-application/SKILL.md",
+      "computedHash": "e5ebade834feb258dfe66eda84da4757f2039735213cf9de4dec6c2b57d8a2b6"
+    },
+    "codex-review": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/dev-tools/skills/codex-review/SKILL.md",
+      "computedHash": "ea4e23b0893d34b0f0b84b5b95950f676e867d870632dfca07c51cda05ec30a3"
+    },
+    "color-palette": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/design-assets/skills/color-palette/SKILL.md",
+      "computedHash": "837bca002c3d13c19477ee170e6e33e152a009336d31ff77f75c26f763f8f6eb"
+    },
+    "deep-research": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/dev-tools/skills/deep-research/SKILL.md",
+      "computedHash": "5681b2e99768b7e2eb588d88336be283515fb16e4d7c4c77093af8653f289593"
+    },
+    "design-loop": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/frontend/skills/design-loop/SKILL.md",
+      "computedHash": "6e346eb1e61bd27d229cd7859324ccd4cc08e283f1143b16ee1d0ebde8162421"
+    },
+    "design-review": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/frontend/skills/design-review/SKILL.md",
+      "computedHash": "39580fa14d35ec0ca60d5079d7f3e10dbad73b670da5dcae546523a9f11801c1"
+    },
+    "design-system": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/frontend/skills/design-system/SKILL.md",
+      "computedHash": "2022bb3b292fc40c2da24d9c58ad2c526efc1cb2ba1a2213c20eaae837aef4d0"
+    },
+    "design-taste-frontend": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/taste-skill/SKILL.md",
+      "computedHash": "b10eab0a9684cd09cf34c31ef04a3bf530a5f4404422f9c520d42372d670c7fc"
+    },
+    "elevenlabs-agents": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/integrations/skills/elevenlabs-agents/SKILL.md",
+      "computedHash": "50d27eac0ce1be5fe730d6f29918b7249127b11c211a99d3b8ae53365537e83b"
+    },
+    "favicon-gen": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/design-assets/skills/favicon-gen/SKILL.md",
+      "computedHash": "d2c096a328785cb4b1902ca1e951135286b94b585d283185f3760c03d1c417c8"
+    },
+    "fork-discipline": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/dev-tools/skills/fork-discipline/SKILL.md",
+      "computedHash": "4ec69e10fe7af85da1fb265a36d36c3f815bd35be9a3e9b33bb9b84ed167cc35"
+    },
+    "git-workflow": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/dev-tools/skills/git-workflow/SKILL.md",
+      "computedHash": "72745bdd626a338ee5e653ecee23866a8b9bb1b8d697dff61e56100978623bb9"
+    },
+    "github-release": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/dev-tools/skills/github-release/SKILL.md",
+      "computedHash": "4a64bdcc40231120bf3e0c65275a36e6ade059991d9a417cd442d22dcb6e71b7"
+    },
+    "google-apps-script": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/integrations/skills/google-apps-script/SKILL.md",
+      "computedHash": "719da588bcdff9fbe6ea5866aab67de6fc1d4bac58aee7c5183c7c45f13c27b5"
+    },
+    "google-chat-messages": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/integrations/skills/google-chat-messages/SKILL.md",
+      "computedHash": "4fe9b75fc85b2df518564b2f45295384c0c84cbb12462cff0a8a75f79ab1d9d0"
+    },
+    "gws-install": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/integrations/skills/gws-install/SKILL.md",
+      "computedHash": "ca10bc43890d35b8f7c74bd30bd1b57ec14fd7f5306d89eb20d321ee1c27f26d"
+    },
+    "gws-setup": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/integrations/skills/gws-setup/SKILL.md",
+      "computedHash": "173c31f467fd32265b69e9979689dbf2af7e23e53eeab57d5baff76f4d6289de"
+    },
+    "icon-set-generator": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/design-assets/skills/icon-set-generator/SKILL.md",
+      "computedHash": "de8de16df8fd40eeceec6eab0de18c257e4dc86de7cbbc3ad755225fc00b1cf8"
+    },
+    "image-processing": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/design-assets/skills/image-processing/SKILL.md",
+      "computedHash": "7065677fbd9ccaead5944f930403535340c5642b0e4533f7bd22b91d953eb61e"
+    },
+    "landing-page": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/frontend/skills/landing-page/SKILL.md",
+      "computedHash": "d29808a29c4e2ffabac1cc4c8625656e4994ccc76fda3f82b1ee920980e2bcf8"
+    },
+    "mcp-builder": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/integrations/skills/mcp-builder/SKILL.md",
+      "computedHash": "b8b9ef3756bf4a254605311773374d97db0b7e8273e29a0fa6150d9ee628748e"
+    },
+    "nemoclaw-setup": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/integrations/skills/nemoclaw-setup/SKILL.md",
+      "computedHash": "1499837c1586f9a6699ce83a810f1d119413a5b6aafee736f68c2133cc39852b"
+    },
+    "nz-business-english": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/writing/skills/nz-business-english/SKILL.md",
+      "computedHash": "e35692c93ad45e4c7f289ac04c5af4a0756bbf1f6b2852fcc51af400b66a17a9"
+    },
+    "onboarding-ux": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/dev-tools/skills/onboarding-ux/SKILL.md",
+      "computedHash": "1ce841f727d0d77e514051057c548c3199f83079b2616045288566357de5003f"
+    },
+    "parcel-tracking": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/integrations/skills/parcel-tracking/SKILL.md",
+      "computedHash": "a7ac98fa2e9861738fe08e3142b6a02ee3243ede35f147c617d1ca98c3a993da"
+    },
+    "product-showcase": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/frontend/skills/product-showcase/SKILL.md",
+      "computedHash": "970809ca4b831f21620211a8e3d57ef235837fc25088a88060a39de77201edb6"
+    },
+    "project-docs": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/dev-tools/skills/project-docs/SKILL.md",
+      "computedHash": "c5d6926beae54a15f9f2913e049fe60b65376111dbb5d26410a0109f5dde4550"
+    },
+    "project-health": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/dev-tools/skills/project-health/SKILL.md",
+      "computedHash": "2fb944c42cc583e99757bdfe65e1f0bf9b687890a8f052d15c48f0edb60b43b7"
+    },
+    "proposal-writer": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/writing/skills/proposal-writer/SKILL.md",
+      "computedHash": "3bbcc54a55c615f2877893096ef1b69b82efc02f37dc1a5cde8f33e64b227469"
+    },
+    "react-native": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/frontend/skills/react-native/SKILL.md",
+      "computedHash": "5bd409c03e85bbd790813afab645afec277d85dc7a4669fda9027c11993ddd74"
+    },
+    "react-patterns": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/frontend/skills/react-patterns/SKILL.md",
+      "computedHash": "0f7c719b4265b7215dea0b28036542942dccbb6e34f952a0ef627a5a4227d12d"
+    },
+    "responsiveness-check": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/dev-tools/skills/responsiveness-check/SKILL.md",
+      "computedHash": "3fb35e3eb00d025118efc29a190e768c5a4183571e559f50b387783eab4c6c40"
+    },
+    "resume-cover-letter": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/writing/skills/resume-cover-letter/SKILL.md",
+      "computedHash": "85b00cb8d38af1e88a7f2fb06203db8825af97503b55dae63a9fc68e2ad7be03"
+    },
+    "roadmap": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/dev-tools/skills/roadmap/SKILL.md",
+      "computedHash": "3f1bf691e3ce8a6822c6332f3dae60af4ca8d54104ff13dab699e4ca197ab912"
+    },
+    "seo-local-business": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/web-design/skills/seo-local-business/SKILL.md",
+      "computedHash": "9496af165f220929c915e6eeb682c683b6a5b696f1815b2b54740f9dfe45b56c"
+    },
+    "shadcn-ui": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/frontend/skills/shadcn-ui/SKILL.md",
+      "computedHash": "23cf187bb16946621856d6fa2baf288dc13c6f65740a8be9c39df117d89f31bf"
+    },
+    "shopify-content": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/shopify/skills/shopify-content/SKILL.md",
+      "computedHash": "7ea3bf4cb7da3776d85259d46e4380a5776daaf6159e1f1e8296b835f7e10893"
+    },
+    "shopify-products": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/shopify/skills/shopify-products/SKILL.md",
+      "computedHash": "9ac112bcbbb53bde183efb4d33a9b907e79b4222687a4fbe3accb19facd8446b"
+    },
+    "shopify-setup": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/shopify/skills/shopify-setup/SKILL.md",
+      "computedHash": "6584897c9f4c05af323ea6dfeaa8495cd2661158b089face3ab285fb305300c6"
+    },
+    "social-media-posts": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/social-media/skills/social-media-posts/SKILL.md",
+      "computedHash": "bb7fb6e33b6bd382dedae724c20ca6e5c42655c4dd80896abc2aaefc20dbd437"
+    },
+    "strategy-document": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/writing/skills/strategy-document/SKILL.md",
+      "computedHash": "35d2b4fa9eaa55be229588eccdd01ae73fdb11d52b8f521ad0973a713ed1cee6"
+    },
+    "stripe-payments": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/integrations/skills/stripe-payments/SKILL.md",
+      "computedHash": "d2d89f9be5ec081e13980d8345a3a7b50d6499fa38f938fd7aae78d54b179f99"
+    },
+    "tailwind-theme-builder": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/frontend/skills/tailwind-theme-builder/SKILL.md",
+      "computedHash": "4b95e21c900b3da4f68471431757903e45dd055b5901edb747769087b0e50ff4"
+    },
+    "team-update": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/dev-tools/skills/team-update/SKILL.md",
+      "computedHash": "447277ab634fe771a31e8dab556d48f9c63ddcfc7ebbcdd905c431ce41245c73"
+    },
+    "ui-ux-pro-max": {
+      "source": "nextlevelbuilder/ui-ux-pro-max-skill",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/ui-ux-pro-max/SKILL.md",
+      "computedHash": "ff6863fc7c1be035b294703b2e7c90b2197548985ca4cb98f58740a7e84dc0cc"
+    },
+    "uk-business-english": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/writing/skills/uk-business-english/SKILL.md",
+      "computedHash": "b6e8e610a620d97750de786103f03efb11c2c2f088c60186d6c87b16c58f14e8"
+    },
+    "us-business-english": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/writing/skills/us-business-english/SKILL.md",
+      "computedHash": "e4a8fb69e32bc1ecaac8ef3afa8619ae79f7571aa5b75d1f763c1d29f9c132ba"
+    },
+    "ux-audit": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/dev-tools/skills/ux-audit/SKILL.md",
+      "computedHash": "d18def8193c5c9b131bf36970382433a33f40f03773db7546072550929d34e7e"
+    },
+    "ux-compare": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/dev-tools/skills/ux-compare/SKILL.md",
+      "computedHash": "3b596041d197b639f34cec5c29606e3c7a0c7f0d1b39131198ac781577b52094"
+    },
+    "ux-extract": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/dev-tools/skills/ux-extract/SKILL.md",
+      "computedHash": "590fe637bb9fdc723eb460cff624d57bd666d36cd8ecd18451f529376c359b1e"
+    },
+    "vite-flare-starter": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/cloudflare/skills/vite-flare-starter/SKILL.md",
+      "computedHash": "7d6493e949390ef95acd0bacd63fb8629b9fc2f224bdafcc03e0057e62ca40b5"
+    },
+    "vitest": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/dev-tools/skills/vitest/SKILL.md",
+      "computedHash": "ece2f899ebe0b9eff9283deca170fd86013ef99c449a9f57a49e193c66daa552"
+    },
+    "wordpress-content": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/wordpress/skills/wordpress-content/SKILL.md",
+      "computedHash": "505790c880f2d77fde000ab61690f649c6160dbbe32e5bff8ab09b7eccde1e93"
+    },
+    "wordpress-elementor": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/wordpress/skills/wordpress-elementor/SKILL.md",
+      "computedHash": "d94117fea25ede1a7c8a327031268d13e27579ca61bd7ab74b2ad0187896e151"
+    },
+    "wordpress-setup": {
+      "source": "jezweb/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/wordpress/skills/wordpress-setup/SKILL.md",
+      "computedHash": "db01bd3a7af61c09db3675dd379e2eeb17f09ec8908f79e312a2fd7cbc6a0b7a"
+    }
+  }
+}

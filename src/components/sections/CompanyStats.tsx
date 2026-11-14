@@ -19,6 +19,18 @@ const highlights: Highlight[] = [
   { text: "Certified", label: "Technicians", icon: BadgeCheck },
 ];
 
+// Touch feedback colour: mobile browsers do not reliably apply :active to
+// non-interactive elements, so mirror Motion's tap state as an attribute.
+// Written straight to the DOM — no React state, no re-render.
+const pressedCard = (e: Event) =>
+  (e.target as Element | null)?.closest?.(".stat") ?? null;
+const setPressed = (e: Event) =>
+  pressedCard(e)?.setAttribute("data-pressed", "");
+const clearPressed = () =>
+  document
+    .querySelectorAll(".stat[data-pressed]")
+    .forEach((el) => el.removeAttribute("data-pressed"));
+
 export function CompanyStats() {
   const v = useRevealVariants();
   const revealKey = useRevealKey();
@@ -33,6 +45,10 @@ export function CompanyStats() {
               variants={v.card}
               {...reveal(i)}
               whileHover="hover"
+              whileTap="tap"
+              onTapStart={setPressed}
+              onTap={clearPressed}
+              onTapCancel={clearPressed}
               data-reveal
             >
               <dt>

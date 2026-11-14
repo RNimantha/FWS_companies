@@ -69,6 +69,12 @@ const variants = {
       transition: { duration: 0.65, ease: EASE, delay: i * STEP },
     }),
     hover: { y: -5, transition: { duration: 0.25, ease: EASE } },
+    // Touch press feedback: a gentle squeeze that springs back on release.
+    tap: {
+      scale: 0.97,
+      y: 0,
+      transition: { type: "spring", stiffness: 500, damping: 30 },
+    },
   },
   icon: {
     hidden: { opacity: 0, scale: 0.6, rotate: -14 },
@@ -87,6 +93,11 @@ const variants = {
       rotate: [0, -10, 8, 0],
       scale: 1.08,
       transition: { duration: 0.5, ease: "easeInOut" },
+    },
+    tap: {
+      rotate: [0, -10, 8, 0],
+      scale: 1.08,
+      transition: { duration: 0.45, ease: "easeInOut" },
     },
   },
 } satisfies Record<string, Variants>;
