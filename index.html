@@ -2,25 +2,40 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <script>
+      (function () {
+        var preference;
+        try {
+          preference = localStorage.getItem("fwc-theme");
+        } catch (e) {}
+        var theme =
+          preference === "light" || preference === "dark"
+            ? preference
+            : window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light";
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#1B3A4B" />
-    <title>FWC Companies | Plumbing, Electrical & HVAC</title>
+    <meta name="theme-color" content="#101010" />
+    <title>FWC Plumbing &amp; Rooter | One Call, We Do It All</title>
     <meta
       name="description"
-      content="Plumbing, electrical, HVAC and drain services from FWC Companies in Placentia, California. Call for 24/7 emergency help or request an estimate."
+      content="Professional plumbing and rooter services for residential, multi-family, commercial and institutional properties. Based in Placentia. Call 714-410-2728 for 24/7 service."
     />
     <link rel="canonical" href="https://fwccompanies.com/" />
     <meta
       property="og:title"
-      content="FWC Companies | Your property. Our priority."
+      content="FWC Plumbing &amp; Rooter | One Call, We Do It All"
     />
     <meta
       property="og:description"
-      content="Plumbing, electrical and HVAC services for homes and multifamily properties. Available 24/7."
+      content="Professional plumbing and rooter services. Powered by FWC Companies. 24/7 Service."
     />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://fwccompanies.com/" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" href="/assets/images/fwc-mark.png" />
     <link
       rel="preload"
       href="/assets/fonts/inter-latin.woff2"
@@ -30,7 +45,14 @@
     />
     <meta
       property="og:image"
-      content="https://fwccompanies.com/assets/images/work.webp"
+      content="https://fwccompanies.com/assets/images/fwc-truck-clean.jpg"
+    />
+    <link
+      rel="preload"
+      href="/assets/fonts/poppins-700.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
     />
     <meta name="twitter:card" content="summary_large_image" />
     <script type="application/ld+json">
@@ -38,7 +60,7 @@
         "@context": "https://schema.org",
         "@type": "LocalBusiness",
         "@id": "https://fwccompanies.com/#business",
-        "name": "FWC Companies",
+        "name": "FWC Plumbing & Rooter",
         "legalName": "FWC LLC",
         "url": "https://fwccompanies.com/",
         "telephone": "+17144102728",

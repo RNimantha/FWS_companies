@@ -7,7 +7,9 @@ const browser = await chromium.launch({
     ? { executablePath: process.env.CHROME_PATH }
     : {}),
 });
-const page = await browser.newPage();
+const page = await browser.newPage({
+  colorScheme: process.env.QA_THEME === "dark" ? "dark" : "light",
+});
 const errors = [];
 page.on("pageerror", (e) => errors.push(e.message));
 const url = process.env.QA_URL || "http://127.0.0.1:4173";

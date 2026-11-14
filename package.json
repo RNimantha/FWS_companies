@@ -11,7 +11,9 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:browser": "node scripts/browser-check.mjs",
-    "format": "prettier --write src server tests scripts vite.config.ts eslint.config.js tsconfig.json package.json index.html"
+    "format": "prettier --write src server tests scripts vite.config.ts eslint.config.js tsconfig.json package.json index.html",
+    "test:brand": "node scripts/brand-check.mjs",
+    "assets:brand": "node scripts/optimize-brand-assets.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

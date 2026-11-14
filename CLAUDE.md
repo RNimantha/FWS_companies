@@ -14,7 +14,7 @@ The application is now scaffolded as React + strict TypeScript + Vite + Tailwind
 
 Actual scripts: `npm run dev`, `npm run build` (type-check, client build, Vite SSR build and static prerender), `npm run preview`, `npm run typecheck`, `npm run lint`, `npm test`. See package.json for additional QA scripts.
 
-Online submission stays disabled without VITE_LEAD_ENDPOINT. Never enable it without an approved endpoint. No advertising vendors are installed; analytics events are local readiness hooks only. The header wordmark is provisional; original photo and brand rights require client confirmation.
+Online submission stays disabled without VITE_LEAD_ENDPOINT. Never enable it without an approved endpoint. No advertising vendors are installed; analytics events are local readiness hooks only. The header and footer use the client-supplied logo; public/Lory.jpeg is the primary brand reference. Source image files are preserved unchanged.
 
 ## What this project is
 
@@ -74,46 +74,22 @@ Key reusable components called out: `Header`, `HeroSection`, `TrustBar`, `Servic
 
 Single page, in this order (reorderable only when justified by UX/CRO reasoning): Header → Hero → Trust Indicators → Services → Why Choose FWC → Projects → How It Works → Contact Form → FAQ → Final CTA → Footer. A sticky mobile CTA bar (Call Now / Get Estimate) must persist across the page without blocking content.
 
-## Design direction
+## Design direction (client-approved, 12 November 2026)
 
-This refines/supersedes the generic guidance in `instruction.MD` §6 with concrete decisions. Direction: **"Navy & Signal Red"** — clean, fast-to-scan, built for a property manager calling at 2 a.m. and a homeowner comparing three contractors on their phone. Keeps FWC's existing navy/red so the brand stays recognizable, but drops the chrome/clip-art emblem-as-hero look.
+The latest client branding supersedes the earlier Navy & Signal Red direction.
 
-**Palette**
-
-| Role | Colour | Use |
-|---|---|---|
-| Primary | Navy `#1B3A4B` | Header, hero panels, headings |
-| Dark | Ink `#0E1A22` | Footer, dark sections |
-| Action | Signal red `#C8102E` | Call / Estimate / Emergency buttons only — never decorative |
-| Surface | Off-white `#F5F6F7` | Section backgrounds |
-| Accent (optional) | Amber `#F2A900` | "24/7" / "Open now" labels, used sparingly |
-
-Verify every text/colour pairing against WCAG AA contrast before shipping. The old maroon (`#800000`) is retired — reads dull and dated next to signal red.
-
-**Typography:** Poppins (headings) + Inter (body), both free on Google Fonts — keeps continuity with the current site's Poppins while fixing its weak hierarchy and bold-body-text readability problem.
-
-| Role | Font | Weight | Size (desktop / mobile) |
-|---|---|---|---|
-| H1 | Poppins | 700 | 52 / 34px, line-height 1.1 |
-| H2 | Poppins | 700 | 34 / 26px, line-height 1.2 |
-| H3 | Poppins | 600 | 22 / 20px |
-| Body | Inter | 400 | 17 / 16px, line-height 1.6 |
-| Buttons, nav, labels | Inter | 600 | 15–16px |
-| Phone number, "24/7" | Poppins | 700 | Larger than nav text |
-
-Rules: load only Poppins 600/700 and Inter 400/600, self-hosted as WOFF2 with `font-display: swap`. Never bold body paragraphs (the current homepage does this). Keep text lines to ~65–75 characters. If a more distinctive, industrial feel is wanted later, **Barlow Semi Condensed 700** is a reasonable heading alternative to Poppins (fits long service names like "Trenchless Pipe Lining" on one mobile line) — but it costs continuity with the current brand look, so treat it as a fallback option, not the default.
-
-**Look and feel**
-- Hero: a real crew/truck photo with a dark navy overlay, not the logo graphic. Headline names the trades + area; two CTAs (Call, Get an Estimate) plus small trust chips (Licensed · BBB A+ · 24/7 · ~1hr response).
-- Service cards: white cards, subtle borders, simple line icons; a light per-trade accent color (blue/amber/teal) on icons only, used sparingly.
-- Navigation: full horizontal nav on desktop with a services dropdown, a visible phone number, and a red "24/7 Emergency" button — not the current hamburger-only pattern.
-- Mobile: the sticky bottom bar (Call / Text / Estimate) is the single biggest conversion lever — treat it as non-negotiable, not decorative.
-- Proof sections: project cards with before/after, a reviews strip, certification badges.
-- Logo: keep the full emblem for trucks/print; commission a simplified horizontal vector lockup for the web header — never use the emblem as the hero image again.
-
-**Avoid:** stock "smiling plumber" photography, gradients/glass effects, text baked into images, and the jokey all-caps lines from the current site ("PANIC BUTTON!", "COOL OFF HOT HEAD!") — they undercut credibility with multifamily/property-manager clients.
-
-**Stack note:** ignore any suggestion (from this or future design discussion) to build this on Next.js, Astro, or a WordPress theme — the required stack is locked in `instruction.MD` §4 as React + TypeScript (strict) + Vite + Tailwind. Design direction above applies within that stack.
+- Official public name: **FWC Plumbing & Rooter**. Associated branding: **Powered by FWC Companies**. Legal footer name remains FWC LLC.
+- Primary slogan: **ONE CALL, WE DO IT ALL**. Secondary: **WE HANDLE PROBLEMS OTHERS CAN'T FIGURE OUT**.
+- Palette: black #101010, vivid red #E51C35, white #FFFFFF, silver #C6C8CC. Theme surfaces/text use shared CSS tokens, with accessible red text variants where needed.
+- Use the supplied logo public/lofwc.jpeg without redrawing, filters or metallic CSS effects. public/Lory.jpeg is the real company truck reference. Resized/WebP derivatives improve loading; originals remain unchanged.
+- Light/dark toggle follows the system on first visit, persists fwc-theme preference, and initializes before React hydration.
+- Keep honeycomb texture subtle and limited to the hero. Avoid excessive red surfaces and effects.
+- Client-approved company highlights: 8 Trucks, 12 Employees, 24/7 Service, Certified Technicians.
+- Include WE OFFER FINANCING, with no invented financing terms. Remove public Client Login links.
+- Who We Serve: Single Family, Multi-Family Specialist, Commercial & Institutional, HOA.
+- Preserve all seven service categories and stable backend service IDs; group truck-listed capabilities into existing cards.
+- public/footer/footer1.jpeg is a supplied BBB badge; footer2.jpeg is a promotional credentials overview, not an issuer certificate. Display both supplied credential images inline in the actual footer, not only in a pop-up. Identify the overview as company-supplied material without adding credential numbers or warranty promises. Current validity, detailed certificates, and badge permissions still need client documentation.
+- Never push these changes without a new explicit user instruction; the current branding request expressly prohibits pushing.
 
 ## Non-negotiable constraints
 

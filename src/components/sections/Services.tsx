@@ -10,16 +10,16 @@ export function ServicesSection({
       <div className="container">
         <div className="section-intro">
           <div>
-            <p className="eyebrow">ONE CALL. MULTIPLE SOLUTIONS.</p>
+            <p className="eyebrow">OUR SERVICES</p>
             <h2>
-              Every trade.
+              Plumbing is our specialty.
               <br />
-              One dependable team.
+              Solutions are what we do.
             </h2>
           </div>
           <p>
-            Small repairs or bigger projects. Get the right help for your home,
-            rental, or multifamily property.
+            From rooter and drain blockages to plumbing installations, plus the
+            electrical and HVAC services your property needs.
           </p>
         </div>
         <div className="service-grid">

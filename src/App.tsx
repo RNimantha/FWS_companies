@@ -1,21 +1,22 @@
 import { useState } from "react";
 import {
-  ArrowDown,
   ArrowUpRight,
-  Check,
   ChevronDown,
   Clock3,
   MapPin,
   Phone,
   Wrench,
-  Zap,
-  Wind,
   Building2,
   Truck,
   Layers3,
 } from "lucide-react";
+import { HeroSection } from "./components/sections/HeroSection";
+import { CompanyStats } from "./components/sections/CompanyStats";
+import { WhoWeServe } from "./components/sections/WhoWeServe";
+import { FinancingInfo } from "./components/sections/FinancingInfo";
+import { Footer } from "./components/layout/Footer";
 import { Header } from "./components/layout/Header";
-import { Brand, CallButton, EstimateButton } from "./components/ui/Actions";
+import { CallButton, EstimateButton } from "./components/ui/Actions";
 import { ServicesSection } from "./components/sections/Services";
 import { LeadForm } from "./components/forms/LeadForm";
 import { business, faqs } from "./data/content";
@@ -30,91 +31,10 @@ export default function App() {
       <div id="top" />
       <Header />
       <main id="main">
-        <section className="hero">
-          <div className="container hero-grid">
-            <div className="hero-copy">
-              <p className="eyebrow hero-eyebrow">
-                <span /> BASED IN PLACENTIA, CALIFORNIA
-              </p>
-              <h1>
-                Plumbing.
-                <br />
-                Electrical. HVAC.
-                <br />
-                <span>Problems solved.</span>
-              </h1>
-              <p className="hero-description">
-                Plumbing, electrical & HVAC services for the places you call
-                home and the properties you manage.
-              </p>
-              <div className="hero-actions">
-                <EstimateButton location="hero" />
-                <a
-                  className="hero-call"
-                  href={business.tel}
-                  onClick={() => track("phone_click", "hero")}
-                >
-                  <Phone size={17} /> Call our team
-                </a>
-              </div>
-              <div className="hero-proof">
-                <span>
-                  <Check size={15} /> Residential & multifamily
-                </span>
-                <span>
-                  <Clock3 size={15} /> 24/7 emergency help
-                </span>
-              </div>
-            </div>
-            <div className="hero-visual">
-              <img
-                src="/assets/images/plumbing.webp"
-                alt="Service technician accessing tools in a fully equipped work van"
-                width="476"
-                height="612"
-                fetchPriority="high"
-              />
-              <div className="photo-label">
-                <span className="live-dot" />
-                <div>
-                  <strong>Ready for the unexpected.</strong>
-                  <span>Repairs. Installations. Emergency help.</span>
-                </div>
-                <ArrowUpRight size={22} />
-              </div>
-              <div className="photo-location">
-                <MapPin size={13} /> BASED IN PLACENTIA, CA
-              </div>
-            </div>
-          </div>
-          <div className="hero-bottom container">
-            <span>Built around your property’s needs.</span>
-            <a href="#services">
-              EXPLORE OUR SERVICES <ArrowDown size={15} />
-            </a>
-          </div>
-        </section>
-        <div className="trade-strip">
-          <div className="container">
-            <span>
-              <Wrench />
-              Plumbing
-            </span>
-            <span>
-              <Zap />
-              Electrical
-            </span>
-            <span>
-              <Wind />
-              Heating & cooling
-            </span>
-            <span>
-              <Clock3 />
-              24/7 response
-            </span>
-          </div>
-        </div>
+        <HeroSection />
+        <CompanyStats />
         <ServicesSection onSelect={setSelected} />
+        <WhoWeServe />
         <section id="why-fwc" className="section why-section">
           <div className="container why-grid">
             <div className="why-image">
@@ -136,16 +56,12 @@ export default function App() {
             </div>
             <div className="why-copy">
               <p className="eyebrow">THE FWC APPROACH</p>
-              <h2>
-                Your property has
-                <br />a lot of moving parts.
-                <br />
-                We help keep them moving.
-              </h2>
+              <h2>WE HANDLE PROBLEMS OTHERS CAN'T FIGURE OUT</h2>
               <p>
-                One team for your essential trades. FWC works with homeowners
-                and multifamily property managers on repairs, installations, and
-                the unexpected.
+                FWC Plumbing & Rooter brings practical expertise to repairs,
+                installations, and the unexpected. Powered by FWC Companies, our
+                team also provides electrical and HVAC services for your
+                property.
               </p>
               <div className="benefit">
                 <Building2 />
@@ -193,25 +109,20 @@ export default function App() {
                 Have a project in mind? <ArrowUpRight size={17} />
               </a>
             </div>
-            <div className="project-grid">
-              <article className="project-feature">
+            <article className="project-case">
+              <figure className="project-case-photo">
                 <img
-                  src="/assets/images/work.webp"
-                  width="720"
-                  height="480"
+                  src="/assets/images/water-heater-project.webp"
+                  width="338"
+                  height="600"
                   loading="lazy"
-                  alt="Electrical distribution panels with neatly routed wiring"
+                  alt="Sediment around the internal tubes of a commercial water heater, from FWC’s published Ontario clean-out project"
                 />
-                <div>
-                  <span className="eyebrow">ELECTRICAL · WORK GALLERY</span>
-                  <h3>Behind the walls. Ahead of the details.</h3>
-                  <p>
-                    A closer look at the electrical work featured in FWC’s
-                    service gallery.
-                  </p>
-                </div>
-              </article>
-              <article className="project-story">
+                <figcaption>
+                  Tank interior from our Ontario water-heater project.
+                </figcaption>
+              </figure>
+              <div className="project-story">
                 <span className="eyebrow">PROJECT SPOTLIGHT · ONTARIO, CA</span>
                 <Wrench size={37} strokeWidth={1.3} />
                 <h3>A fresh start for a hard-working water heater.</h3>
@@ -231,8 +142,8 @@ export default function App() {
                 >
                   Discuss a similar project <ArrowUpRight size={17} />
                 </a>
-              </article>
-            </div>
+              </div>{" "}
+            </article>
           </div>
         </section>
         <section className="section process">
@@ -295,6 +206,7 @@ export default function App() {
                   Call with your ZIP code to confirm service availability.
                 </p>
               </div>
+              <FinancingInfo />
             </div>
             <div className="form-card">
               <LeadForm selected={selected} />
@@ -341,63 +253,7 @@ export default function App() {
           </div>
         </section>
       </main>
-      <footer>
-        <div className="container">
-          <div className="footer-grid">
-            <div>
-              <Brand />
-              <p>
-                Essential trades.
-                <br />
-                Personal attention.
-              </p>
-            </div>
-            <div>
-              <h3>Let’s connect</h3>
-              <a href={business.tel}>{business.phone}</a>
-              <a href={`mailto:${business.email}`}>{business.email}</a>
-              <span>Available 24/7</span>
-            </div>
-            <div>
-              <h3>Find us</h3>
-              <address>{business.address}</address>
-              <a href={business.login} target="_blank" rel="noreferrer">
-                Client login <ArrowUpRight size={13} />
-              </a>
-            </div>
-            <div>
-              <h3>Explore</h3>
-              <a href="#services">Our services</a>
-              <a href="#projects">Our work</a>
-              <a href="#estimate">Request an estimate</a>
-              <a
-                href="https://www.instagram.com/fwccompaniesllc/"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Instagram <ArrowUpRight size={13} />
-              </a>
-            </div>
-          </div>
-          <details id="privacy" className="privacy">
-            <summary>
-              Privacy information <ChevronDown size={14} />
-            </summary>
-            <p>
-              Contact information provided to FWC is used to respond to service
-              inquiries. Please do not include sensitive information in
-              messages. For questions about your information, contact{" "}
-              {business.email}. For urgent assistance, please call our team.
-            </p>
-          </details>
-          <div className="footer-bottom">
-            <span>
-              © {new Date().getFullYear()} FWC LLC. All rights reserved.
-            </span>
-            <span>PLUMBING · ELECTRICAL · HVAC</span>
-          </div>
-        </div>
-      </footer>
+      <Footer />
       <div className="sticky-mobile">
         <a href={business.tel} onClick={() => track("phone_click", "sticky")}>
           <Phone size={18} />

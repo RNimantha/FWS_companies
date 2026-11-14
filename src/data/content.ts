@@ -8,23 +8,28 @@ import {
   Siren,
 } from "lucide-react";
 export const business = {
-  phone: "(714) 410-2728",
+  phone: "714-410-2728",
   tel: "tel:+17144102728",
   email: "robert@fwccompanies.com",
   address: "2007 E Miraloma Ave, Placentia, CA 92870",
-  login:
-    "https://clienthub.getjobber.com/client_hubs/5f587aec-e1e7-4481-b99d-dc3479a5a376/login/new",
+  name: "FWC Plumbing & Rooter",
+  slogan: "ONE CALL, WE DO IT ALL",
+  secondarySlogan: "WE HANDLE PROBLEMS OTHERS CAN'T FIGURE OUT",
+  website: "https://fwccompanies.com",
+  bbb: "https://www.bbb.org/us/ca/placentia/profile/general-contractor/fwc-llc-1126-850066125",
 };
 export const services = [
   {
     id: "plumbing",
-    name: "Plumbing",
+    name: "Plumbing installations & repairs",
     icon: Wrench,
     summary: "From a dripping faucet to a full-system repipe.",
     items: [
-      "Standard & tankless water heaters",
+      "Water heaters & boilers, including tankless systems",
+      "New installations & repairs",
+      "Preventative maintenance",
       "Leak detection & slab-leak repair",
-      "PEX & copper repiping",
+      "Repipes: gas & water, including PEX & copper",
       "Fixture repairs, installations & code updates",
     ],
   },
@@ -78,10 +83,11 @@ export const services = [
   },
   {
     id: "drains",
-    name: "Drain cleaning",
+    name: "Rooter & drain cleaning",
     icon: Pipette,
     summary: "Clear stubborn clogs and get ahead of root problems.",
     items: [
+      "Rooter & drain blockage",
       "Snaking, augering & root cutting",
       "Hydro-jetting & high-flow sewer jetting",
       "Chain knocking, descaling & rotary brushes",
@@ -90,7 +96,7 @@ export const services = [
   },
   {
     id: "emergency",
-    name: "24/7 emergency response",
+    name: "Emergency services",
     icon: Siren,
     summary: "When it cannot wait until tomorrow.",
     items: [
@@ -104,11 +110,11 @@ export const services = [
 export const faqs = [
   [
     "What services does FWC provide?",
-    "We provide plumbing, electrical, heating and cooling, drain cleaning, sewer repair and trenchless pipe repair for residential and multifamily properties.",
+    "FWC Plumbing & Rooter provides plumbing, rooter, drain cleaning, sewer and trenchless pipe services. Our team also offers electrical and heating and cooling services. We serve residential, multi-family, commercial and institutional properties, including HOA communities.",
   ],
   [
     "Can I call outside regular business hours?",
-    "Yes. FWC advertises 24/7 emergency availability. Call (714) 410-2728 to discuss your issue, location and current availability.",
+    "Yes. We offer 24/7 service. Call 714-410-2728 to discuss your issue, location and current availability.",
   ],
   [
     "Do you work with property managers?",

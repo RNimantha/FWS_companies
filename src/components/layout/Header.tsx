@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Menu, X, ArrowUpRight, Phone } from "lucide-react";
 import { Brand, CallButton } from "../ui/Actions";
+import { ThemeToggle } from "../ui/ThemeToggle";
 import { business } from "../../data/content";
 export function Header() {
   const [open, setOpen] = useState(false);
@@ -18,13 +19,11 @@ export function Header() {
   }, [open]);
   return (
     <>
-      <div className="utility">
+      <div className="financing-banner">
         <div className="container">
-          <span>
-            <i /> Here when you need us. Available 24/7.
-          </span>
-          <a href={business.login} target="_blank" rel="noreferrer">
-            Client login <ArrowUpRight size={12} />
+          <span>WE OFFER FINANCING</span>
+          <a href="#financing">
+            Financing options <ArrowUpRight size={14} aria-hidden="true" />
           </a>
         </div>
       </div>
@@ -33,11 +32,12 @@ export function Header() {
           <Brand />
           <nav aria-label="Main navigation" className="desktop-nav">
             <a href="#services">Our services</a>
-            <a href="#why-fwc">Why FWC</a>
+            <a href="#who-we-serve">Who we serve</a>
             <a href="#projects">Our work</a>
             <a href="#faq">FAQs</a>
           </nav>
           <CallButton location="header" className="header-phone" />
+          <ThemeToggle />
           <a
             className="mobile-phone"
             href={business.tel}
@@ -64,6 +64,7 @@ export function Header() {
           >
             {[
               ["Our services", "services"],
+              ["Who we serve", "who-we-serve"],
               ["Why FWC", "why-fwc"],
               ["Our work", "projects"],
               ["FAQs", "faq"],
