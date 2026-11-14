@@ -18,9 +18,33 @@ export const business = {
   website: "https://fwccompanies.com",
   bbb: "https://www.bbb.org/us/ca/placentia/profile/general-contractor/fwc-llc-1126-850066125",
 };
-export const services = [
+// Service photos sourced from the client's current site (fwccompanies.com).
+// TODO: Client confirmation required — confirm photo rights; the HVAC image
+// may be stock/AI-generated and should be replaced with a real FWC job photo.
+export type ServiceImage = {
+  src: string;
+  width: number;
+  height: number;
+  position: string;
+  alt: string;
+};
+export const services: {
+  id: string;
+  name: string;
+  icon: typeof Wrench;
+  summary: string;
+  items: string[];
+  image?: ServiceImage;
+}[] = [
   {
     id: "plumbing",
+    image: {
+      src: "/assets/images/services/plumbing.webp",
+      width: 720,
+      height: 537,
+      position: "center 40%",
+      alt: "FWC crew standing with new water heaters on a multifamily job",
+    },
     name: "Plumbing installations & repairs",
     icon: Wrench,
     summary: "From a dripping faucet to a full-system repipe.",
@@ -35,6 +59,13 @@ export const services = [
   },
   {
     id: "electrical",
+    image: {
+      src: "/assets/images/services/electrical.webp",
+      width: 451,
+      height: 600,
+      position: "center 35%",
+      alt: "Electrical panels mounted on exposed wall studs during an upgrade",
+    },
     name: "Electrical",
     icon: Zap,
     summary: "Practical solutions. Power you can depend on.",
@@ -47,6 +78,13 @@ export const services = [
   },
   {
     id: "hvac",
+    image: {
+      src: "/assets/images/services/hvac.webp",
+      width: 800,
+      height: 600,
+      position: "center 30%",
+      alt: "Technician servicing an outdoor air-conditioning condenser",
+    },
     name: "Heating & cooling",
     icon: Wind,
     summary: "Keep your property comfortable, season after season.",
@@ -59,6 +97,13 @@ export const services = [
   },
   {
     id: "sewer",
+    image: {
+      src: "/assets/images/services/sewer.webp",
+      width: 600,
+      height: 799,
+      position: "center 55%",
+      alt: "Replacement sewer pipe being fitted in an open trench",
+    },
     name: "Drain & sewer repair",
     icon: Waves,
     summary: "Find the problem. Restore the flow.",
@@ -71,6 +116,13 @@ export const services = [
   },
   {
     id: "trenchless",
+    image: {
+      src: "/assets/images/services/trenchless.webp",
+      width: 600,
+      height: 800,
+      position: "center 45%",
+      alt: "Technician feeding a line into a pipe access trench",
+    },
     name: "Trenchless pipe repair",
     icon: ScanLine,
     summary: "Restore aging pipes with less disruption.",
@@ -83,6 +135,13 @@ export const services = [
   },
   {
     id: "drains",
+    image: {
+      src: "/assets/images/services/drains.webp",
+      width: 600,
+      height: 450,
+      position: "center 40%",
+      alt: "FWC truck towing a drain-jetting trailer at a home",
+    },
     name: "Rooter & drain cleaning",
     icon: Pipette,
     summary: "Clear stubborn clogs and get ahead of root problems.",
@@ -106,6 +165,23 @@ export const services = [
       "Call to discuss your situation & availability",
     ],
   },
+];
+// Problem-first entry points for the services ticker. Each maps to a service id
+// above so a tap can preselect the estimate form. Labels describe symptoms only —
+// no response-time, pricing or guarantee claims.
+export const problems: { label: string; service: string }[] = [
+  { label: "No hot water", service: "plumbing" },
+  { label: "Clogged drain", service: "drains" },
+  { label: "Breaker keeps tripping", service: "electrical" },
+  { label: "AC not cooling", service: "hvac" },
+  { label: "Leak or slab leak", service: "plumbing" },
+  { label: "Sewer backup", service: "sewer" },
+  { label: "Tree roots in the line", service: "drains" },
+  { label: "EV-charger wiring", service: "electrical" },
+  { label: "Heat not working", service: "hvac" },
+  { label: "Aging pipes", service: "trenchless" },
+  { label: "Water heater install", service: "plumbing" },
+  { label: "Panel upgrade", service: "electrical" },
 ];
 export const faqs = [
   [

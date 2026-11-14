@@ -33,7 +33,7 @@ try {
         theme: document.documentElement.dataset.theme,
         width: document.documentElement.scrollWidth,
         client: innerWidth,
-        services: document.querySelectorAll(".service-card").length,
+        services: document.querySelectorAll(".svc-card").length,
         audiences: document.querySelectorAll(".audience-card").length,
         stats: [...document.querySelectorAll(".stat dd")].map(
           (x) => x.textContent,
@@ -47,7 +47,7 @@ try {
         `Overflow ${theme} ${width}: ${state.width}`,
       );
       check(
-        state.services === 7 && state.audiences === 4 && state.h1 === 1,
+        state.services === 6 && state.audiences === 4 && state.h1 === 1,
         "Missing content",
       );
       check(

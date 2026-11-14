@@ -20,10 +20,12 @@ try {
     await page.evaluate(() => document.fonts.ready);
     const result = await page.evaluate(() => ({
       scroll: document.documentElement.scrollWidth,
-      services: document.querySelectorAll(".service-card").length,
+      services: document.querySelectorAll(".svc-card").length,
+      emergency: document.querySelectorAll(".svc-emergency").length,
       h1: document.querySelectorAll("h1").length,
     }));
-    if (result.scroll > width || result.services !== 7 || result.h1 !== 1)
+    if (result.scroll > width || result.services !== 6 ||
+      result.emergency !== 1 || result.h1 !== 1)
       throw new Error(`Layout failed: ${width} ${JSON.stringify(result)}`);
     if (width === 375) {
       await page.getByRole("button", { name: "Open menu" }).click();
@@ -56,9 +58,9 @@ try {
     );
   }
   await page
-    .locator(".service-card")
+    .locator(".svc-card")
     .first()
-    .getByRole("link", { name: "Request an estimate" })
+    .getByRole("link", { name: "Get a plumbing estimate" })
     .click();
   if ((await page.locator("#service").inputValue()) !== "plumbing")
     throw new Error("Service preselection failed");
