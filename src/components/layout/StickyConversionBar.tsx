@@ -9,10 +9,9 @@ import { CallButton } from "../ui/Actions";
  * the hero counts as gone once it scrolls under the header.
  */
 const HIDE_WHILE_VISIBLE = [".hero", "#estimate"] as const;
-const HEADER_HEIGHT = 80;
 
 export function StickyConversionBar() {
-  const visible = useShowWhenOffscreen(HIDE_WHILE_VISIBLE, HEADER_HEIGHT);
+  const visible = useShowWhenOffscreen(HIDE_WHILE_VISIBLE, "header");
 
   return (
     <aside

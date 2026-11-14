@@ -65,8 +65,9 @@
   box-sizing: border-box;
 }
 html {
+  --site-header-height: 126px;
   scroll-behavior: smooth;
-  scroll-padding-top: 100px;
+  scroll-padding-top: calc(var(--site-header-height) + 16px);
 }
 body {
   margin: 0;
@@ -358,7 +359,9 @@ header {
   flex-direction: column;
   padding: 8px 20px 22px;
   border-top: 1px solid var(--line);
-  max-height: calc(100dvh - 100px);
+  max-height: calc(
+    100dvh - var(--site-header-height) - 80px - env(safe-area-inset-bottom)
+  );
   overflow: auto;
 }
 .mobile-nav a {
@@ -1893,7 +1896,6 @@ summary::-webkit-details-marker {
   align-items: flex-start;
   gap: 16px;
   background: #1b1b1e;
-  scroll-margin-top: 115px;
 }
 .financing-info > svg {
   color: #c6c8cc;
