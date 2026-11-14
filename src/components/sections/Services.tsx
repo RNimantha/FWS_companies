@@ -1,4 +1,6 @@
 import { ArrowRight, Check, Phone, Plus } from "lucide-react";
+import { m } from "motion/react";
+import { reveal, useRevealKey, useRevealVariants } from "../../lib/motion";
 import { services, business, problems } from "../../data/content";
 
 type Service = (typeof services)[number];
@@ -59,17 +61,24 @@ function ServiceCard({
   onSelect,
   badge,
   compact = false,
+  index = 0,
 }: {
   service: Service;
   onSelect: (id: string) => void;
   badge?: string;
   compact?: boolean;
+  index?: number;
 }) {
   const Heading = compact ? "h4" : "h3";
+  const v = useRevealVariants();
   return (
-    <article
+    <m.article
       className={`svc-card svc-card--${s.id}${compact ? " svc-card--compact" : ""}`}
       aria-labelledby={`svc-${s.id}`}
+      variants={v.card}
+      {...reveal(index)}
+      whileHover="hover"
+      data-reveal
     >
       <div className="svc-cover">
         {s.image && (
@@ -85,13 +94,18 @@ function ServiceCard({
         )}
         {badge && <span className="svc-badge">{badge}</span>}
         <div className="svc-cover-text">
-          <span className="svc-icon">
+          <m.span
+            className="svc-icon"
+            variants={v.icon}
+            custom={index}
+            data-reveal
+          >
             <s.icon
               size={compact ? 21 : 23}
               strokeWidth={1.8}
               aria-hidden="true"
             />
-          </span>
+          </m.span>
           <Heading id={`svc-${s.id}`}>{s.name}</Heading>
           <p>{s.summary}</p>
         </div>
@@ -103,7 +117,7 @@ function ServiceCard({
           <ArrowRight size={17} aria-hidden="true" />
         </a>
       </div>
-    </article>
+    </m.article>
   );
 }
 
@@ -115,6 +129,8 @@ export function ServicesSection({
   const featured = byIds(FEATURED);
   const specialty = byIds(SPECIALTY);
   const emergency = services.find((s) => s.id === "emergency");
+  const v = useRevealVariants();
+  const revealKey = useRevealKey();
 
   const chip = (p: (typeof problems)[number], hidden = false) => (
     <li key={`${p.label}${hidden ? "-dup" : ""}`}>
@@ -169,7 +185,13 @@ export function ServicesSection({
 
       <div className="container">
         {emergency && (
-          <div className="svc-emergency">
+          <m.div
+            key={`emergency-${revealKey}`}
+            className="svc-emergency"
+            variants={v.item}
+            {...reveal()}
+            data-reveal
+          >
             <div className="svc-emergency-copy">
               <span className="svc-live">
                 <span className="svc-live-dot" aria-hidden="true" />
@@ -188,15 +210,16 @@ export function ServicesSection({
                 {business.phone}
               </span>
             </a>
-          </div>
+          </m.div>
         )}
 
-        <div className="svc-featured">
-          {featured.map((s) => (
+        <div key={`featured-${revealKey}`} className="svc-featured">
+          {featured.map((s, i) => (
             <ServiceCard
               key={s.id}
               service={s}
               onSelect={onSelect}
+              index={i}
               badge={s.id === "plumbing" ? "Our specialty" : undefined}
             />
           ))}
@@ -208,10 +231,14 @@ export function ServicesSection({
             Swipe <ArrowRight size={14} />
           </span>
         </div>
-        <div className="svc-specialty" role="list">
-          {specialty.map((s) => (
+        <div
+          key={`specialty-${revealKey}`}
+          className="svc-specialty"
+          role="list"
+        >
+          {specialty.map((s, i) => (
             <div role="listitem" key={s.id}>
-              <ServiceCard service={s} onSelect={onSelect} compact />
+              <ServiceCard service={s} onSelect={onSelect} index={i} compact />
             </div>
           ))}
         </div>

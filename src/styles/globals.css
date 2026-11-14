@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@source not "../../.claude";
 @font-face {
   font-family: Inter;
   src: url("/assets/fonts/inter-latin.woff2") format("woff2");
@@ -541,36 +542,82 @@ h1 > span {
 .company-stats dl {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0;
+  gap: 12px;
   margin: 0;
 }
+/* Each stat is its own card: icon badge, then value, then label. */
 .stat {
+  --stat-pad: 16px;
+  --stat-badge: 40px;
+  position: relative;
   display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: center;
-  gap: 6px 8px;
-  padding: 21px 12px;
+  align-content: start;
+  gap: 2px;
+  padding: calc(var(--stat-pad) + var(--stat-badge) + 14px) var(--stat-pad)
+    var(--stat-pad);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--card);
+  box-shadow: 0 1px 2px #1010100a;
+  overflow: hidden;
+  transition:
+    border-color 0.25s,
+    box-shadow 0.25s;
 }
-.stat:nth-child(odd) {
-  border-right: 1px solid var(--line);
+/* Red accent line that grows on hover (pseudo-element, so it never
+   conflicts with Motion's inline transform on the card). */
+.stat::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: var(--brand-red);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.stat:nth-child(-n + 2) {
-  border-bottom: 1px solid var(--line);
+/* Icon lives inside <dt> (valid <dl> markup) but is pinned to the card's
+   top-left as a badge. No CSS transform: Motion owns scale/rotate. */
+.stat-icon {
+  position: absolute;
+  top: var(--stat-pad);
+  left: var(--stat-pad);
+  display: grid;
+  place-items: center;
+  width: var(--stat-badge);
+  height: var(--stat-badge);
+  border-radius: 11px;
+  background: var(--soft);
+  transition:
+    background 0.25s,
+    color 0.25s;
 }
-.stat > svg {
-  grid-column: 2;
-  grid-row: 1/3;
-  color: var(--muted);
-  width: 20px;
+.stat-icon svg {
+  width: 52%;
+  height: auto;
+}
+.count-up {
+  font-variant-numeric: tabular-nums;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 .stat dt {
-  grid-column: 1;
   grid-row: 2;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted);
 }
 .stat dd {
-  grid-column: 1;
   grid-row: 1;
   font-family: Poppins, sans-serif;
   font-size: 29px;
@@ -805,7 +852,6 @@ h1 > span {
   background: var(--card);
   overflow: hidden;
   transition:
-    transform 0.25s,
     border-color 0.25s,
     box-shadow 0.25s;
 }
@@ -857,8 +903,7 @@ h1 > span {
   box-shadow: 0 6px 18px #0000004d;
   transition:
     background 0.25s,
-    color 0.25s,
-    transform 0.25s;
+    color 0.25s;
 }
 .svc-cover h3,
 .svc-cover h4 {
@@ -1029,8 +1074,18 @@ h1 > span {
   gap: 12px;
 }
 @media (hover: hover) {
+  .stat:hover {
+    border-color: var(--muted);
+    box-shadow: var(--shadow);
+  }
+  .stat:hover::after {
+    transform: scaleX(1);
+  }
+  .stat:hover .stat-icon {
+    background: var(--brand-red);
+    color: #fff;
+  }
   .svc-card:hover {
-    transform: translateY(-5px);
     border-color: var(--muted);
     box-shadow: var(--shadow);
   }
@@ -1040,7 +1095,6 @@ h1 > span {
   .svc-card:hover .svc-icon {
     background: var(--brand-red);
     color: #fff;
-    transform: translateY(-2px);
   }
 }
 @media (min-width: 600px) {
@@ -1896,8 +1950,13 @@ summary::-webkit-details-marker {
   border-top: 2px solid var(--brand-silver);
 }
 .stat dd,
-.stat > svg {
+.stat-icon {
   color: var(--stat-value);
+}
+@media (hover: hover) {
+  .company-stats .stat:hover .stat-icon {
+    color: #fff;
+  }
 }
 .final-cta {
   background: var(--page);
@@ -1925,7 +1984,7 @@ summary::-webkit-details-marker {
 footer {
   background: #101010;
   color: #f4f4f6;
-  padding: 0 0 calc(94px + env(safe-area-inset-bottom));
+  padding: 0 0 calc(var(--smart-bar-space) + env(safe-area-inset-bottom));
 }
 footer > .container {
   padding-top: 45px;
@@ -2022,35 +2081,202 @@ footer > .container {
   font-size: 9px;
   letter-spacing: 1px;
 }
-.sticky-mobile {
+/* ---------- Smart sticky conversion bar ----------
+   Mobile-first floating card at the bottom (thumb zone, clear of the sticky
+   header). Hidden while the hero or the estimate form is on screen, and while
+   the mobile menu is open. Pure CSS transitions: no flash before JS loads. */
+:root {
+  --smart-bar-space: 124px; /* room reserved under the footer */
+}
+.smart-bar {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
   z-index: 40;
+  left: max(8px, env(safe-area-inset-left));
+  right: max(8px, env(safe-area-inset-right));
+  bottom: calc(8px + env(safe-area-inset-bottom));
+  color: #fff;
+  transform: translateY(calc(100% + 24px));
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.3s ease,
+    visibility 0s linear 0.45s;
+}
+.smart-bar[data-visible="true"] {
+  transform: none;
+  opacity: 1;
+  visibility: visible;
+  transition:
+    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.3s ease,
+    visibility 0s;
+}
+/* Never sit over the open mobile menu. */
+body:has(#mobile-nav) .smart-bar {
+  transform: translateY(calc(100% + 24px));
+  opacity: 0;
+  visibility: hidden;
+}
+.smart-bar-inner {
+  display: grid;
+  gap: 9px;
+  max-width: 1200px;
+  margin-inline: auto;
+  padding: 10px;
+  border: 1px solid #ffffff1f;
+  border-radius: 16px;
+  background: #151515;
+  box-shadow:
+    0 12px 32px #0000004d,
+    0 2px 6px #00000033;
+}
+.smart-bar-copy {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding-inline: 4px;
+  min-width: 0;
+}
+.smart-bar-title {
+  margin: 0;
+  font-family: Poppins, Inter, Arial, sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.2px;
+  white-space: nowrap;
+}
+.smart-bar-title span {
+  color: #ff7284;
+}
+.smart-bar-sub {
+  display: none;
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.3;
+  color: #c6c8cc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.smart-bar-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
-  padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
-  border-top: 1px solid var(--line);
-  background: var(--card);
-  box-shadow: 0 -3px 15px #0001;
 }
-.sticky-mobile a {
+.smart-bar-call,
+.smart-bar-estimate {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 9px;
-  min-height: 46px;
-  border: 1px solid var(--line);
-  border-radius: 6px;
+  min-height: 48px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-size: 14px;
   font-weight: 600;
-  font-size: 13px;
+  white-space: nowrap;
+  transition:
+    background 0.18s,
+    transform 0.18s;
 }
-.sticky-mobile a:last-child {
+.smart-bar-call {
   background: var(--brand-red);
-  border-color: var(--brand-red);
-  color: white;
+  color: #fff;
+}
+.smart-bar-call .call-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.15;
+}
+.smart-bar-call small {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+.smart-bar-estimate {
+  background: #fff;
+  color: #101010;
+}
+.smart-bar-call:active,
+.smart-bar-estimate:active {
+  transform: scale(0.97);
+}
+@media (hover: hover) {
+  .smart-bar-call:hover {
+    background: #c9112b;
+    transform: translateY(-1px);
+  }
+  .smart-bar-estimate:hover {
+    background: #ededf0;
+    transform: translateY(-1px);
+  }
+}
+@media (min-width: 390px) {
+  .smart-bar-sub {
+    display: block;
+  }
+}
+@media (min-width: 600px) {
+  :root {
+    --smart-bar-space: 104px;
+  }
+  .smart-bar {
+    left: max(16px, env(safe-area-inset-left));
+    right: max(16px, env(safe-area-inset-right));
+    bottom: calc(14px + env(safe-area-inset-bottom));
+  }
+  .smart-bar-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 10px 10px 10px 22px;
+  }
+  .smart-bar-copy {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    padding: 0;
+  }
+  .smart-bar-title {
+    font-size: 17px;
+  }
+  .smart-bar-actions {
+    display: flex;
+    flex-shrink: 0;
+  }
+  .smart-bar-call,
+  .smart-bar-estimate {
+    padding-inline: 18px;
+  }
+}
+@media (min-width: 1000px) {
+  :root {
+    --smart-bar-space: 112px;
+  }
+  .smart-bar {
+    bottom: calc(18px + env(safe-area-inset-bottom));
+  }
+  .smart-bar-inner {
+    width: min(1200px, calc(100vw - 40px));
+    padding: 12px 12px 12px 26px;
+  }
+  .smart-bar-title {
+    font-size: 20px;
+  }
+  .smart-bar-sub {
+    font-size: 13px;
+  }
+  .smart-bar-call,
+  .smart-bar-estimate {
+    min-height: 52px;
+    padding-inline: 22px;
+    font-size: 15px;
+  }
 }
 @media (hover: hover) {
   .audience-card:hover {
@@ -2096,15 +2322,11 @@ footer > .container {
   .company-stats dl {
     grid-template-columns: repeat(4, 1fr);
   }
+  .company-stats dl {
+    gap: 14px;
+  }
   .stat {
-    padding: 20px;
-  }
-  .stat:nth-child(n) {
-    border: 0;
-    border-right: 1px solid var(--line);
-  }
-  .stat:last-child {
-    border: 0;
+    --stat-pad: 18px;
   }
   .stat:last-child dd {
     font-size: 23px;
@@ -2238,9 +2460,13 @@ footer > .container {
   .company-stats {
     padding: 25px 0;
   }
+  .company-stats dl {
+    gap: 18px;
+  }
   .stat {
-    padding: 18px 33px;
-    gap: 7px 16px;
+    --stat-pad: 24px;
+    --stat-badge: 46px;
+    gap: 4px;
   }
   .stat dd {
     font-size: 34px;
@@ -2250,10 +2476,6 @@ footer > .container {
   }
   .stat:last-child dd {
     font-size: 28px;
-  }
-  .stat > svg {
-    width: 25px;
-    height: 25px;
   }
   .section-intro {
     flex-direction: row;
@@ -2361,7 +2583,7 @@ footer > .container {
     font-size: 13px;
   }
   footer {
-    padding: 0 0 25px;
+    padding: 0 0 calc(var(--smart-bar-space) + env(safe-area-inset-bottom));
   }
   footer > .container {
     padding-top: 55px;
@@ -2398,9 +2620,6 @@ footer > .container {
     flex-direction: row;
     justify-content: space-between;
   }
-  .sticky-mobile {
-    display: none;
-  }
 }
 @media (max-width: 359px) {
   .container {
@@ -2424,11 +2643,12 @@ footer > .container {
   .hero-call {
     font-size: 12px;
   }
-  .stat {
-    padding: 18px 7px;
+  .company-stats dl {
+    gap: 10px;
   }
-  .stat > svg {
-    width: 17px;
+  .stat {
+    --stat-pad: 13px;
+    --stat-badge: 36px;
   }
   .stat:last-child dd {
     font-size: 19px;
@@ -2492,13 +2712,6 @@ footer > .container {
   .footer-grid {
     grid-template-columns: 1fr;
   }
-  .stat:nth-child(n) {
-    border-right: 0;
-    border-bottom: 1px solid var(--line);
-  }
-  .stat:last-child {
-    border: 0;
-  }
   .credential-badge {
     flex-direction: column;
     align-items: flex-start;
@@ -2510,4 +2723,8 @@ footer > .container {
     padding: 18px;
     flex-direction: column;
   }
+}
+
+.form-grid .field-full {
+  grid-column: 1 / -1;
 }

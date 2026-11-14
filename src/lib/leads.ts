@@ -18,7 +18,5 @@ export async function submitLead(lead: Lead, key: string) {
     );
   const data = (await response.json()) as { accepted?: boolean };
   if (data.accepted !== true)
-    throw new Error(
-      "We could not confirm receipt. Please call 714-410-2728.",
-    );
+    throw new Error("We could not confirm receipt. Please call 714-410-2728.");
 }

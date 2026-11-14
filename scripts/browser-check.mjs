@@ -24,8 +24,12 @@ try {
       emergency: document.querySelectorAll(".svc-emergency").length,
       h1: document.querySelectorAll("h1").length,
     }));
-    if (result.scroll > width || result.services !== 6 ||
-      result.emergency !== 1 || result.h1 !== 1)
+    if (
+      result.scroll > width ||
+      result.services !== 6 ||
+      result.emergency !== 1 ||
+      result.h1 !== 1
+    )
       throw new Error(`Layout failed: ${width} ${JSON.stringify(result)}`);
     if (width === 375) {
       await page.getByRole("button", { name: "Open menu" }).click();
@@ -78,6 +82,8 @@ try {
     await page.getByLabel("Full name", { exact: true }).fill("Test Customer");
     await page.getByLabel("Phone number", { exact: true }).fill("7145550123");
     await page.getByLabel("ZIP code", { exact: true }).fill("92870");
+    if (await page.locator("#email, #message").count())
+      throw new Error("Removed fields still visible");
     let count = 0;
     await page.route("**/api/leads", async (route) => {
       count++;
@@ -97,6 +103,9 @@ try {
     await page.unroute("**/api/leads");
     await page.route("**/api/leads", (route) => {
       count++;
+      const payload = route.request().postDataJSON();
+      if (payload.email !== "" || payload.message !== "")
+        throw new Error("API compatibility fields must be empty strings");
       return route.fulfill({
         status: 201,
         contentType: "application/json",

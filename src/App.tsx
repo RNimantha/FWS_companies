@@ -4,7 +4,6 @@ import {
   ChevronDown,
   Clock3,
   MapPin,
-  Phone,
   Wrench,
   Building2,
   Truck,
@@ -16,15 +15,16 @@ import { WhoWeServe } from "./components/sections/WhoWeServe";
 import { FinancingInfo } from "./components/sections/FinancingInfo";
 import { Footer } from "./components/layout/Footer";
 import { Header } from "./components/layout/Header";
+import { StickyConversionBar } from "./components/layout/StickyConversionBar";
 import { CallButton, EstimateButton } from "./components/ui/Actions";
 import { ServicesSection } from "./components/sections/Services";
 import { LeadForm } from "./components/forms/LeadForm";
-import { business, faqs } from "./data/content";
-import { track } from "./lib/analytics";
+import { faqs } from "./data/content";
+import { MotionProvider } from "./lib/motion";
 export default function App() {
   const [selected, setSelected] = useState("");
   return (
-    <>
+    <MotionProvider>
       <a className="skip-link" href="#main">
         Skip to content
       </a>
@@ -254,16 +254,7 @@ export default function App() {
         </section>
       </main>
       <Footer />
-      <div className="sticky-mobile">
-        <a href={business.tel} onClick={() => track("phone_click", "sticky")}>
-          <Phone size={18} />
-          Call now
-        </a>
-        <a href="#estimate">
-          Get estimate
-          <ArrowUpRight size={18} />
-        </a>
-      </div>
-    </>
+      <StickyConversionBar />
+    </MotionProvider>
   );
 }

@@ -27,10 +27,13 @@ export function CallButton({
   location = "page",
   className = "",
   label,
+  sublabel,
 }: {
   location?: string;
   className?: string;
   label?: string;
+  /** Optional second line, e.g. the phone number under "Call Now". */
+  sublabel?: string;
 }) {
   return (
     <a
@@ -38,8 +41,15 @@ export function CallButton({
       href={business.tel}
       onClick={() => track("phone_click", location)}
     >
-      <Phone size={17} />
-      <span>{label ?? business.phone}</span>
+      <Phone size={17} aria-hidden="true" />
+      {sublabel ? (
+        <span className="call-text">
+          <span>{label ?? business.phone}</span>
+          <small>{sublabel}</small>
+        </span>
+      ) : (
+        <span>{label ?? business.phone}</span>
+      )}
     </a>
   );
 }

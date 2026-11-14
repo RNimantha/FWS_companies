@@ -7,7 +7,6 @@ import {
   LoaderCircle,
   Phone,
   UserRound,
-  Mail,
   MapPin,
   ClipboardList,
   LockKeyhole,
@@ -45,7 +44,7 @@ export function LeadForm({ selected }: { selected: string }) {
     setStatus("");
     track("lead_form_submit", "estimate");
     try {
-      await submitLead(values, key.current);
+      await submitLead({ ...values, email: "", message: "" }, key.current);
       setSuccess(true);
       track("lead_form_success", "estimate");
     } catch (e) {
@@ -84,7 +83,7 @@ export function LeadForm({ selected }: { selected: string }) {
           </span>
         </div>
         <h3>Request a Free Estimate</h3>
-        <p>Tell us about your project and we’ll get back to you quickly.</p>
+        <p>Leave your details and we’ll get back to you quickly.</p>
       </div>
       {!import.meta.env.VITE_LEAD_ENDPOINT && (
         <p className="form-notice">
@@ -114,13 +113,6 @@ export function LeadForm({ selected }: { selected: string }) {
                 type: "tel",
               },
               {
-                key: "email",
-                label: "Email (optional)",
-                auto: "email",
-                placeholder: "you@example.com",
-                type: "email",
-              },
-              {
                 key: "zip",
                 label: "ZIP code",
                 auto: "postal-code",
@@ -129,22 +121,23 @@ export function LeadForm({ selected }: { selected: string }) {
               },
             ] as const
           ).map((f) => (
-            <div className="field" key={f.key}>
+            <div
+              className={`field ${f.key === "name" ? "field-full" : ""}`}
+              key={f.key}
+            >
               <label htmlFor={f.key}>{f.label}</label>
               <div className="input-shell">
                 {f.key === "name" ? (
                   <UserRound size={17} aria-hidden="true" />
                 ) : f.key === "phone" ? (
                   <Phone size={17} aria-hidden="true" />
-                ) : f.key === "email" ? (
-                  <Mail size={17} aria-hidden="true" />
                 ) : (
                   <MapPin size={17} aria-hidden="true" />
                 )}
                 <input
                   id={f.key}
                   type={f.type}
-                  required={f.key !== "email"}
+                  required
                   autoComplete={f.auto}
                   inputMode={f.key === "zip" ? "numeric" : undefined}
                   placeholder={f.placeholder}
@@ -166,7 +159,7 @@ export function LeadForm({ selected }: { selected: string }) {
       </fieldset>
       <fieldset className="form-group project-form-group">
         <legend>
-          <span>02</span> Your project
+          <span>02</span> Service required
         </legend>
         <div className="field">
           <label htmlFor="service">How can we help?</label>
@@ -192,21 +185,6 @@ export function LeadForm({ selected }: { selected: string }) {
             <span className="field-error" id="service-error">
               {errors.service.message}
             </span>
-          )}
-        </div>
-        <div className="field">
-          <label htmlFor="message">
-            A little about your project <span>(optional)</span>
-          </label>
-          <textarea
-            id="message"
-            rows={3}
-            maxLength={2000}
-            placeholder="What’s happening at your property?"
-            {...register("message")}
-          />
-          {errors.message && (
-            <span className="field-error">{errors.message.message}</span>
           )}
         </div>
       </fieldset>

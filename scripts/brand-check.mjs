@@ -35,8 +35,9 @@ try {
         client: innerWidth,
         services: document.querySelectorAll(".svc-card").length,
         audiences: document.querySelectorAll(".audience-card").length,
+        // Accessible value: count-up stats expose it via .sr-only
         stats: [...document.querySelectorAll(".stat dd")].map(
-          (x) => x.textContent,
+          (x) => (x.querySelector(".sr-only") ?? x).textContent,
         ),
         h1: document.querySelectorAll("h1").length,
         login: /client login/i.test(document.body.innerText),

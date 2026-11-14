@@ -2,32 +2,67 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Repository state
-
-The application is now scaffolded as React + strict TypeScript + Vite + Tailwind CSS.
-
-- `instruction.MD` is the governing project brief.
-- `fwcdetails.md` is the factual discovery source.
-- `src/` contains the landing page, reusable header/actions/services/form, content and validation.
-- `server/leads.ts` is the shared submission handler. `netlify/functions/leads.ts` mounts the production `/api/leads` endpoint; `server/netlify-leads.ts` connects Google Sheets. Apps Script provides locked, durable request-ID/payload deduplication; Netlify config supplies platform per-client rate limiting. See `docs/NETLIFY.md` for runtime environment requirements.
-- `docs/INTEGRATION.md` records remaining production gates.
-
-Actual scripts: `npm run dev`, `npm run build` (type-check, client build, Vite SSR build and static prerender), `npm run preview`, `npm run typecheck`, `npm run lint`, `npm test`. See package.json for additional QA scripts.
-
-Online submission stays disabled without VITE_LEAD_ENDPOINT. Never enable it without an approved endpoint. No advertising vendors are installed; analytics events are local readiness hooks only. The header and footer use the client-supplied logo; public/Lory.jpeg is the primary brand reference. Source image files are preserved unchanged.
-
 ## What this project is
 
 A single-page, mobile-first, ClickFunnels-style **lead-generation landing page** for FWC Companies (legal name FWC LLC), a 24/7 plumbing/electrical/HVAC contractor in Placentia, CA serving Orange County and the Inland Empire. It replaces an existing Jobber-builder site. This is explicitly **not** a traditional multi-page corporate site for phase one — it's one high-converting page optimized for paid traffic (Google/Meta Ads).
 
 Primary conversion: estimate/contact form submission. Secondary conversion: phone call.
 
+- `instruction.MD` is the governing project brief.
+- `fwcdetails.md` is the factual discovery source.
+- `docs/INTEGRATION.md` records remaining production gates; `docs/NETLIFY.md` covers deployment/runtime env; `docs/QA.md`/`docs/QA-FOLLOWUP.md`/`docs/BRAND-REVIEW.md` record verification already performed and what's still outstanding.
+
+## Commands
+
+- `npm run dev` — Vite dev server on `127.0.0.1`. Includes the local `/api/leads` middleware (see Architecture below); without `GOOGLE_APPS_SCRIPT_URL`/`GOOGLE_APPS_SCRIPT_SECRET` in `.env.local` it answers 503 instead of delivering.
+- `npm run build` — `tsc -b` type-check → Vite client build → Vite SSR build of `src/entry-server.tsx` into `.prerender/` → `scripts/prerender.mjs` renders `App` to a string, inlines it into `dist/index.html`, and deletes `.prerender/`.
+- `npm run preview` — serves the built `dist/` on `127.0.0.1` with the same lead middleware as `dev`.
+- `npm run typecheck` — `tsc -b` only.
+- `npm run lint` — ESLint over the repo.
+- `npm run format` — Prettier over `src server tests scripts vite.config.ts eslint.config.js tsconfig.json package.json index.html`.
+- `npm test` — `vitest run` (all tests, once). Single file: `npx vitest run tests/leads.test.ts`. Single test by name: `npx vitest run tests/leads.test.ts -t "name substring"`.
+- `npm run test:browser` — `scripts/browser-check.mjs`: Playwright sweep of a built+previewed app across 320–1440px checking for horizontal overflow, expected section counts, mobile-menu Escape handling, and axe WCAG checks at 375/1440px. Requires `npm run build && npm run preview` already running (default `QA_URL=http://127.0.0.1:4173`) and Chromium (`npx playwright install chromium`, or set `CHROME_PATH` to an installed Chrome binary). For the mocked lead-form path, start Vite with `VITE_LEAD_ENDPOINT=/api/leads`, point `QA_URL` at that dev server, and set `QA_FORM=1` — it intercepts every submission and sends nothing real.
+- `npm run test:brand` — `scripts/brand-check.mjs`: brand/theme QA (light + dark, more widths) against a local preview, default `QA_URL=http://127.0.0.1:4180`; same `CHROME_PATH` override. Writes artifacts to `artifacts/brand-review/`.
+- `npm run assets:brand` — `scripts/optimize-brand-assets.mjs` regenerates resized/WebP derivatives of the supplied brand photos (e.g. `public/Lory.jpeg`); it never modifies the original source files.
+
+Node engines: `^22.12.0 || ^24.0.0 || >=26.0.0`.
+
+## Architecture
+
+### Lead submission pipeline
+
+This is the one piece of real backend logic in the repo, and it's reused across three hosts rather than duplicated:
+
+1. `src/lib/lead-schema.ts` defines the Zod `leadSchema`/`Lead` type — shared by client and server, so the server never trusts the browser's own validation.
+2. `src/components/forms/LeadForm.tsx` (React Hook Form) calls `submitLead` in `src/lib/leads.ts`, which throws immediately if `VITE_LEAD_ENDPOINT` is unset. **Online submission is opt-in, not default** — see `docs/INTEGRATION.md` before ever setting that variable against a real endpoint.
+3. `server/leads.ts` exports `createLeadHandler(deps)`, a hosting-neutral `Request -> Response` handler: enforces POST/origin/content-type/body-size, validates with `leadSchema`, requires an `Idempotency-Key` UUID header, then calls injected `deps` for rate limiting and idempotency claim/accept/release/delivery. It never talks to Google directly — that's injected, so it's testable without network calls (see `tests/leads.test.ts`, `tests/server.test.ts`).
+4. `server/google-apps-script.ts` is the one real delivery adapter: it POSTs to a deployed Google Apps Script web app (`integrations/google-apps-script/Code.gs`), which does locked, durable dedup by request ID *and* payload fingerprint — that lock is the actual source of truth for "was this lead already saved," not anything in this repo's process memory.
+5. Two hosts wire `createLeadHandler` + the Apps Script adapter together:
+   - `server/local-leads.ts` — a Vite plugin (`localLeadPlugin`, mounted in `vite.config.ts`) used by `dev`/`preview`; does in-memory per-IP rate limiting, which is fine only because it's local/single-process.
+   - `netlify/functions/leads.ts` — the production `/api/leads` Netlify Function, via `server/netlify-leads.ts`; rate limiting is delegated to Netlify's `config.rateLimit` rather than reimplemented in-process.
+
+Never add an in-memory "already accepted" cache as a substitute for the Apps Script lock — multiple function instances and retries must all hit the same durable check (see the comments in `server/leads.ts` and `server/netlify-leads.ts` explaining why).
+
+### Page composition
+
+`src/App.tsx` is the entire page — see "Landing page structure" below for section order — and is intentionally not split into routes (no React Router is installed). `src/entry-server.tsx` renders that same `App` with `renderToString` for `scripts/prerender.mjs` to inline into `dist/index.html`, so the shipped HTML carries full content and the business `LocalBusiness` JSON-LD with JavaScript disabled, and React then hydrates on top for menus, service selection and the form.
+
+- Business content (services, FAQs, company facts) lives in `src/data/content.ts`, not inline in JSX — put new/changed copy there, and keep stable `service.id`s intact since the lead form, analytics and URLs reference them.
+- Components are split into `src/components/{layout,ui,sections,forms}` by role (layout chrome, small reusable actions/toggles, page sections, the form).
+- `src/hooks/useTheme.ts` plus the inline script in `index.html`'s `<head>` keep the `fwc-theme` dark/light preference consistent from first paint through hydration (avoids a flash/mismatch); both read/write the same `localStorage` key and must stay in sync if touched.
+- `src/lib/motion.tsx` (+ the lazy-loaded `src/lib/motion-features.ts`) centralizes the `motion` (Framer Motion) setup: `LazyMotion`/`strict` mode, the `reveal()`/`useRevealVariants()` scroll-entrance helpers, and `useRevealKey()`, which remounts animated containers after hydration so the prerendered output stays fully visible with JS off and `prefers-reduced-motion` is respected.
+- `src/lib/analytics.ts`'s `track()` is a local-only readiness hook (`fwc:analytics` CustomEvent) — no vendor is wired up; never pass PII, raw URLs or query strings into it (see Non-negotiable constraints).
+
+## Landing page structure
+
+Single page, in this order (reorderable only when justified by UX/CRO reasoning): Header → Hero → Trust Indicators → Services → Why Choose FWC → Projects → How It Works → Contact Form → FAQ → Final CTA → Footer. A sticky mobile CTA bar (Call Now / Get Estimate) must persist across the page without blocking content.
+
 ## Source-of-truth priority (critical)
 
 When content, copy, or business facts are ambiguous or conflicting, resolve in this order:
 1. Client-approved requirements (explicit instructions given in the session)
 2. `fwcdetails.md` (the discovery report)
-3. Existing repository content (once code exists)
+3. Existing repository content (`src/data/content.ts`, etc.)
 4. The live site at fwccompanies.com
 
 **Never invent** testimonials, certifications, reviews, addresses, years of experience, pricing, guarantees, or other business claims. Mark anything unconfirmed as `TODO: Client confirmation required` rather than guessing. Only confirmed-active services may be presented; legacy/unclear services require explicit approval before inclusion.
@@ -40,39 +75,6 @@ The current live site has verified factual errors — do not carry these into th
 - Service area claims conflict across pages (Anaheim vs. Placentia vs. Norco vs. Santa Ana; stray mentions of Arizona, LA, San Bernardino) — do not assert a service area beyond what's client-confirmed.
 - Financing figures conflict ($250,000 in meta vs. $400,000 on-page) — treat both as unverified until confirmed with Hearth/the client.
 - Company founding year, CSLB license number, and several certification details are unverified — see `fwcdetails.md` §14 ("Missing Information to Request from the Client") before stating any of these as fact.
-
-## Technology stack (required once code exists)
-
-- React + TypeScript (strict mode)
-- Vite
-- Tailwind CSS
-- React Router, React Hook Form + Zod, Lucide React, Vitest + React Testing Library, Playwright, ESLint + Prettier — add only as needed, not preemptively
-
-Avoid unnecessary dependencies and overengineering. Do not introduce a different framework without explicit approval. Plan for prerendering/SSR for SEO, but don't build it until it's actually needed.
-
-## Planned component architecture
-
-`instruction.MD` specifies this structure for when the app is scaffolded:
-
-```
-src/components/layout
-src/components/ui
-src/components/sections
-src/components/forms
-src/pages
-src/data
-src/hooks
-src/lib
-src/types
-src/styles
-public/assets
-```
-
-Key reusable components called out: `Header`, `HeroSection`, `TrustBar`, `ServiceCard`, `ServicesSection`, `ProjectsGallery`, `LeadForm`, `FAQAccordion`, `StickyMobileCTA`, `Footer`. Keep business content (copy, service data) separate from UI components where practical — e.g. service definitions belong in `src/data`, not hardcoded in JSX.
-
-## Landing page structure
-
-Single page, in this order (reorderable only when justified by UX/CRO reasoning): Header → Hero → Trust Indicators → Services → Why Choose FWC → Projects → How It Works → Contact Form → FAQ → Final CTA → Footer. A sticky mobile CTA bar (Call Now / Get Estimate) must persist across the page without blocking content.
 
 ## Design direction (client-approved, 12 November 2026)
 
@@ -101,4 +103,19 @@ The latest client branding supersedes the earlier Navy & Signal Red direction.
 
 ## Working process
 
-Before changing code: inspect existing conventions, read `instruction.MD` and `fwcdetails.md`, identify relevant files, and plan substantial changes before implementing. Keep changes small and focused; don't touch unrelated files. After implementation: run lint/type-check/tests/build (once configured), verify responsive behavior where possible, and report actual results — including limitations — rather than assuming success. Work incrementally through the phases in `instruction.MD` §15 (requirements → design system → component build → form/integrations → SEO/perf/a11y → production readiness) rather than building everything at once.
+Component build-out (`instruction.MD` §15 phases 1–3) is done; current work sits in phases 4–6 — approved integrations/conversion events, SEO/performance/accessibility, and production readiness. Check `docs/INTEGRATION.md` for what's still gating a real production lead destination, and `docs/QA.md`/`docs/QA-FOLLOWUP.md`/`docs/BRAND-REVIEW.md` for what's already been verified, before assuming something is or isn't done.
+
+Before changing code: inspect existing conventions, read `instruction.MD` and `fwcdetails.md`, identify relevant files, and plan substantial changes before implementing. Keep changes small and focused; don't touch unrelated files. After implementation: run lint/type-check/tests/build, verify responsive behavior where possible, and report actual results — including limitations — rather than assuming success.
+## Design skills (taste-skill) — scope limits
+
+The client-approved design direction above overrides any design skill.
+When using design-taste-frontend or redesign-existing-projects:
+- Do not change the palette, logo, slogans, fonts, or honeycomb usage.
+- No new animation libraries (no GSAP); use src/lib/motion.tsx only, and
+  keep prefers-reduced-motion and the useRevealKey hydration behaviour.
+- Use existing CSS theme tokens; every change must work in light and dark.
+- Never add or rewrite business claims, stats, testimonials or copy;
+  copy changes go through src/data/content.ts and need my approval.
+- Never change LeadForm logic, lead-schema, server/, or service IDs.
+  Styling of the form is allowed.
+- Do not reorder sections without stating the CRO reason first.
