@@ -32,10 +32,13 @@ export function HeroSection() {
               <Clock3 size={17} />
               24/7 SERVICE
             </span>
-            <span>
-              <MapPin size={15} />
-              Based in Placentia, CA
-            </span>
+            <div className="hero-location">
+              <span>
+                <MapPin size={15} />
+                Based in Placentia, CA
+              </span>
+              <p className="hero-service-areas">{business.serviceArea}</p>
+            </div>
           </div>
         </div>
         <div className="hero-visual">

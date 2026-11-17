@@ -30,6 +30,12 @@ export function createGoogleSheetsDelivery(config: GoogleAppsScriptConfig) {
       throw new Error("Invalid request ID.");
     }
     const validated = leadSchema.parse(lead);
+    // Legacy deployed Apps Script saves Message but ignores unknown fields.
+    // Preserve both selections there until the extended receiver is deployed.
+    const metadata = `Preferred contact: ${validated.preferredContact}\nProperty type: ${validated.propertyType}`;
+    const message = [validated.message, metadata].filter(Boolean).join("\n");
+    if (message.length > 2000)
+      throw new Error("Lead message exceeds the receiver limit.");
     // Follow Google's ContentService redirect. Never place the secret in a URL.
     const response = await send(url.toString(), {
       method: "POST",
@@ -37,7 +43,7 @@ export function createGoogleSheetsDelivery(config: GoogleAppsScriptConfig) {
       body: JSON.stringify({
         secret: config.secret,
         requestId,
-        lead: validated,
+        lead: { ...validated, message },
       }),
       redirect: "follow",
       signal: AbortSignal.timeout(10000),

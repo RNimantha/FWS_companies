@@ -75,6 +75,18 @@ try {
   )
     throw new Error("FAQ failed");
   if (process.env.QA_FORM === "1") {
+    let count = 0;
+    let accepted = false;
+    const payloads = [];
+    await page.route("**/api/leads", async (route) => {
+      count++;
+      payloads.push(route.request().postDataJSON());
+      await route.fulfill({
+        status: accepted ? 201 : 502,
+        contentType: "application/json",
+        body: JSON.stringify({ accepted }),
+      });
+    });
     const button = page.getByRole("button", { name: "Request my estimate" });
     await button.click();
     if (!(await page.getByText("Enter your full name.").isVisible()))
@@ -82,41 +94,75 @@ try {
     await page.getByLabel("Full name", { exact: true }).fill("Test Customer");
     await page.getByLabel("Phone number", { exact: true }).fill("7145550123");
     await page.getByLabel("ZIP code", { exact: true }).fill("92870");
-    if (await page.locator("#email, #message").count())
-      throw new Error("Removed fields still visible");
-    let count = 0;
-    await page.route("**/api/leads", async (route) => {
-      count++;
-      await route.fulfill({
-        status: 502,
-        contentType: "application/json",
-        body: '{"accepted":false}',
-      });
-    });
+    if (
+      (await page.locator("#message").count()) ||
+      !(await page.locator("#email").count())
+    )
+      throw new Error("Email/project fields incorrect");
+    const choices = await page
+      .locator("#propertyType option")
+      .allTextContents();
+    if (
+      JSON.stringify(choices.slice(1)) !==
+      JSON.stringify([
+        "Single Family",
+        "Multi Family",
+        "Commercial",
+        "Institutional",
+        "HOA",
+      ])
+    )
+      throw new Error("Property options incorrect");
+    await page.locator("#propertyType").selectOption("Commercial");
+    await page.getByRole("radio", { name: "Email", exact: true }).check();
+    await button.click();
+    if (!(await page.locator("#email-error").isVisible()) || count !== 0)
+      throw new Error("Email preference did not require email");
+    await page.locator("#email").fill("customer@example.com");
     await button.click();
     await page.getByRole("alert").waitFor();
     if (
-      (await page.getByLabel("Full name", { exact: true }).inputValue()) !==
-      "Test Customer"
+      (await page.locator("#email").inputValue()) !== "customer@example.com" ||
+      (await page.locator("#propertyType").inputValue()) !== "Commercial"
     )
-      throw new Error("Lost form inputs");
-    await page.unroute("**/api/leads");
-    await page.route("**/api/leads", (route) => {
-      count++;
-      const payload = route.request().postDataJSON();
-      if (payload.email !== "" || payload.message !== "")
-        throw new Error("API compatibility fields must be empty strings");
-      return route.fulfill({
-        status: 201,
-        contentType: "application/json",
-        body: '{"accepted":true}',
-      });
-    });
+      throw new Error("Lost form values");
+    accepted = true;
     await button.click();
     await page.getByRole("heading", { name: "Request received." }).waitFor();
-    if (count !== 2) throw new Error("Unexpected number of submissions");
+    if (
+      count !== 2 ||
+      payloads.some(
+        (p) =>
+          p.email !== "customer@example.com" ||
+          p.preferredContact !== "Email" ||
+          p.propertyType !== "Commercial" ||
+          p.message !== "",
+      )
+    )
+      throw new Error("Email submission payload incorrect");
+    await page.reload({ waitUntil: "networkidle" });
+    await page.getByLabel("Full name", { exact: true }).fill("Test Customer");
+    await page.getByLabel("Phone number", { exact: true }).fill("7145550123");
+    await page.getByLabel("ZIP code", { exact: true }).fill("92870");
+    await page.locator("#service").selectOption("plumbing");
+    await page.locator("#propertyType").selectOption("HOA");
+    if (
+      !(await page
+        .getByRole("radio", { name: "Phone", exact: true })
+        .isChecked())
+    )
+      throw new Error("Phone is not the default");
+    await page.getByRole("button", { name: "Request my estimate" }).click();
+    await page.getByRole("heading", { name: "Request received." }).waitFor();
+    if (
+      count !== 3 ||
+      payloads[2].preferredContact !== "Phone" ||
+      payloads[2].propertyType !== "HOA" ||
+      payloads[2].email !== ""
+    )
+      throw new Error("Phone submission payload incorrect");
     console.log(
-      "PASS mocked form: validation, provider failure, preserved input, retry and confirmed success. No real lead sent.",
+      "PASS mocked form: conditional email validation, five property types, both contact preferences, failure recovery and success. No real lead sent.",
     );
   } else if (
     process.env.QA_EXPECT_DISABLED === "1" &&

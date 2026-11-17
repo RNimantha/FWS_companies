@@ -8,6 +8,8 @@ const lead = {
   zip: "02870",
   message: "Test only",
   website: "",
+  preferredContact: "Phone" as const,
+  propertyType: "Single Family" as const,
 };
 const requestId = "12345678-1234-1234-1234-123456789012";
 const config = {
@@ -28,7 +30,10 @@ describe("Google Sheets server adapter", () => {
     expect(JSON.parse(options?.body as string)).toEqual({
       secret: config.secret,
       requestId,
-      lead,
+      lead: {
+        ...lead,
+        message: `${lead.message}\nPreferred contact: Phone\nProperty type: Single Family`,
+      },
     });
     expect(options?.redirect).toBe("follow");
     expect(url).not.toContain(config.secret);

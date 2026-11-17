@@ -8,6 +8,8 @@ const valid = {
   service: "plumbing",
   message: "Water heater needs service",
   website: "",
+  preferredContact: "Phone" as const,
+  propertyType: "Single Family" as const,
 };
 describe("lead input boundary", () => {
   it("accepts a complete request with optional email omitted", () =>
@@ -26,4 +28,33 @@ describe("lead input boundary", () => {
     expect(leadSchema.parse({ ...valid, name: "  Test Customer  " }).name).toBe(
       "Test Customer",
     ));
+});
+
+it("requires an email address when Email is preferred", () => {
+  expect(
+    leadSchema.safeParse({ ...valid, preferredContact: "Email" }).success,
+  ).toBe(false);
+  expect(
+    leadSchema.safeParse({
+      ...valid,
+      preferredContact: "Email",
+      email: "customer@example.com",
+    }).success,
+  ).toBe(true);
+});
+it("validates property types and contact-method allowlists", () => {
+  for (const propertyType of [
+    "Single Family",
+    "Multi Family",
+    "Commercial",
+    "Institutional",
+    "HOA",
+  ])
+    expect(leadSchema.safeParse({ ...valid, propertyType }).success).toBe(true);
+  expect(
+    leadSchema.safeParse({ ...valid, propertyType: "Other" }).success,
+  ).toBe(false);
+  expect(
+    leadSchema.safeParse({ ...valid, preferredContact: "SMS" }).success,
+  ).toBe(false);
 });

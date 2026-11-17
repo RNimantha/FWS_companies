@@ -6,7 +6,8 @@
  */
 var FWC_HEADERS = [
   'Submitted At', 'Request ID', 'Payload Hash', 'Full Name', 'Phone', 'Email',
-  'Service Code', 'Service Required', 'ZIP Code', 'Message', 'Status'
+  'Service Code', 'Service Required', 'ZIP Code', 'Message', 'Status',
+  'Preferred Contact', 'Property Type'
 ];
 var FWC_SERVICES = {
   plumbing: 'Plumbing', electrical: 'Electrical', hvac: 'Heating & cooling',
@@ -48,7 +49,12 @@ function doPost(e) {
       var previous = sheet.getRange(2, 2, lastRow - 1, 1)
         .createTextFinder(lead.requestId).matchEntireCell(true).useRegularExpression(false).findNext();
       if (previous) {
-        if (sheet.getRange(previous.getRow(), 3).getValue() !== hash) {
+        var storedHash = sheet.getRange(previous.getRow(), 3).getValue();
+        var compatibility = 'Preferred contact: ' + lead.preferredContact + '\nProperty type: ' + lead.propertyType;
+        var metadataMatches = lead.message === compatibility || lead.message.slice(-(compatibility.length + 1)) === '\n' + compatibility;
+        // Before this receiver was updated, the server preserved the new values in Message.
+        // Accept that same six-field receipt only when its metadata agrees with the new fields.
+        if (storedHash !== hash && !(metadataMatches && storedHash === fwcLegacyHash_(lead))) {
           return fwcJson_({ accepted: false, code: 'IDEMPOTENCY_CONFLICT' });
         }
         return fwcJson_({ accepted: true, requestId: lead.requestId, duplicate: true });
@@ -63,7 +69,7 @@ function doPost(e) {
     sheet.getRange(row, 1, 1, FWC_HEADERS.length).setValues([[
       new Date(), lead.requestId, hash,
       fwcSafeCell_(lead.name), fwcSafeCell_(lead.phone), fwcSafeCell_(lead.email),
-      lead.service, FWC_SERVICES[lead.service], lead.zip, fwcSafeCell_(lead.message), 'New'
+      lead.service, FWC_SERVICES[lead.service], lead.zip, fwcSafeCell_(lead.message), 'New', lead.preferredContact, lead.propertyType
     ]]);
     sheet.getRange(row, 1).setNumberFormat('yyyy-mm-dd hh:mm:ss');
     SpreadsheetApp.flush();
@@ -95,16 +101,26 @@ function fwcSettings_() {
 function fwcSheet_(settings) {
   var spreadsheet = SpreadsheetApp.openById(settings.id);
   var sheet = spreadsheet.getSheetByName(settings.sheetName) || spreadsheet.insertSheet(settings.sheetName);
-  if (sheet.getLastRow() === 0) {
-    if (sheet.getMaxColumns() < FWC_HEADERS.length) {
-      sheet.insertColumnsAfter(sheet.getMaxColumns(), FWC_HEADERS.length - sheet.getMaxColumns());
-    }
+  var empty = sheet.getLastRow() === 0;
+  var migrate = false;
+  if (!empty) {
+    var actual = sheet.getRange(1, 1, 1, Math.min(sheet.getMaxColumns(), FWC_HEADERS.length)).getValues()[0];
+    var legacy = FWC_HEADERS.slice(0, 11);
+    if (JSON.stringify(actual.slice(0, 11)) !== JSON.stringify(legacy)) throw new Error('Unexpected sheet headers');
+    var tail = actual.slice(11);
+    var blank = tail.every(function (value) { return value === '' || value == null; });
+    if (!blank && JSON.stringify(tail) !== JSON.stringify(FWC_HEADERS.slice(11))) throw new Error('Unexpected extension columns');
+    migrate = blank;
+  }
+  if (sheet.getMaxColumns() < FWC_HEADERS.length) sheet.insertColumnsAfter(sheet.getMaxColumns(), FWC_HEADERS.length - sheet.getMaxColumns());
+  if (empty) {
     sheet.getRange(1, 1, 1, FWC_HEADERS.length).setValues([FWC_HEADERS])
-      .setFontWeight('bold').setBackground('#1B3A4B').setFontColor('#FFFFFF');
+      .setFontWeight('bold').setBackground('#101010').setFontColor('#FFFFFF');
     sheet.setFrozenRows(1);
-  } else {
-    var actual = sheet.getRange(1, 1, 1, FWC_HEADERS.length).getValues()[0];
-    if (JSON.stringify(actual) !== JSON.stringify(FWC_HEADERS)) throw new Error('Unexpected sheet headers');
+  } else if (migrate) {
+    // Append columns only. Never rewrite or infer values for historical lead rows.
+    sheet.getRange(1, 12, 1, 2).setValues([FWC_HEADERS.slice(11)])
+      .setFontWeight('bold').setBackground('#101010').setFontColor('#FFFFFF');
   }
   return sheet;
 }
@@ -115,12 +131,18 @@ function fwcValidate_(body) {
   if (!data || typeof data !== 'object' || Array.isArray(data)) return null;
   var keys = ['name', 'phone', 'email', 'service', 'zip', 'message', 'website'];
   for (var i = 0; i < keys.length; i++) if (typeof data[keys[i]] !== 'string') return null;
+  var preferredContact = data.preferredContact === undefined ? 'Phone' : data.preferredContact;
+  var propertyType = data.propertyType === undefined ? '' : data.propertyType;
+  if (['Phone', 'Email'].indexOf(preferredContact) === -1 ||
+      (data.propertyType !== undefined && ['Single Family', 'Multi Family', 'Commercial', 'Institutional', 'HOA'].indexOf(propertyType) === -1)) return null;
   var lead = {
     requestId: body.requestId, name: data.name.trim(), phone: data.phone.trim(),
-    email: data.email, service: data.service, zip: data.zip, message: data.message.trim()
+    email: data.email, service: data.service, zip: data.zip, message: data.message.trim(),
+    preferredContact: preferredContact, propertyType: propertyType
   };
   if (lead.name.length < 2 || lead.name.length > 100 ||
       !/^[+()\d\s.-]{7,25}$/.test(lead.phone) || lead.phone.replace(/\D/g, '').length < 10 ||
+      (lead.preferredContact === 'Email' && !lead.email) ||
       lead.email.length > 254 || (lead.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(lead.email)) ||
       !Object.prototype.hasOwnProperty.call(FWC_SERVICES, lead.service) ||
       !/^\d{5}$/.test(lead.zip) || lead.message.length > 2000 || data.website !== '') return null;
@@ -132,8 +154,19 @@ function fwcSafeCell_(value) {
   return /^[\s]*[=+@-]/.test(value) ? "'" + value : value;
 }
 
+function fwcLegacyHash_(lead) {
+  return fwcDigest_([lead.name, lead.phone, lead.email, lead.service, lead.zip, lead.message]);
+}
+
 function fwcHash_(lead) {
-  var payload = JSON.stringify([lead.name, lead.phone, lead.email, lead.service, lead.zip, lead.message]);
+  var fields = [lead.name, lead.phone, lead.email, lead.service, lead.zip, lead.message];
+  // Keep historical hashes valid for legacy payloads without the new selections.
+  if (lead.propertyType || lead.preferredContact !== 'Phone') fields.push(lead.preferredContact, lead.propertyType);
+  return fwcDigest_(fields);
+}
+
+function fwcDigest_(fields) {
+  var payload = JSON.stringify(fields);
   return Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, payload, Utilities.Charset.UTF_8)
     .map(function (byte) { return ('0' + ((byte + 256) % 256).toString(16)).slice(-2); }).join('');
 }

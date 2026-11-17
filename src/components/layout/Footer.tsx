@@ -12,7 +12,7 @@ export function Footer() {
             <Brand />
             <p className="footer-slogan">{business.slogan}</p>
             <p>
-              Plumbing & rooter expertise.
+              Plumbing & Rooter expertise.
               <br />
               Powered by FWC Companies.
             </p>

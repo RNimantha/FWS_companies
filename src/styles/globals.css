@@ -2747,3 +2747,72 @@ body:has(#mobile-nav) .smart-bar {
 .form-grid .field-full {
   grid-column: 1 / -1;
 }
+
+.hero-proof .hero-location {
+  flex: 1 1 170px;
+  min-width: 0;
+}
+.hero-location > span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.hero-service-areas {
+  margin: 8px 0 0;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--muted);
+}
+.hero-proof > .availability {
+  align-self: flex-start;
+}
+
+.contact-preference {
+  border: 0;
+  padding: 0;
+  margin: 22px 0 0;
+}
+.contact-preference legend {
+  padding: 0;
+  margin-bottom: 10px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.contact-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.contact-option {
+  display: block;
+  position: relative;
+  cursor: pointer;
+}
+.contact-option input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+.contact-option span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 48px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--field);
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+.contact-option input:checked + span {
+  background: var(--text);
+  color: var(--card);
+  border-color: var(--text);
+}
+.contact-option input:focus-visible + span {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}

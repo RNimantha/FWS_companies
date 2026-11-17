@@ -11,6 +11,8 @@ const lead = {
   zip: "92870",
   message: "",
   website: "",
+  preferredContact: "Phone" as const,
+  propertyType: "Single Family" as const,
 };
 const env = {
   GOOGLE_APPS_SCRIPT_URL: "https://script.google.com/macros/s/TEST/exec",
@@ -50,7 +52,10 @@ describe("Netlify /api/leads function", () => {
     expect(JSON.parse(send.mock.calls[0][1]?.body as string)).toEqual({
       secret: env.GOOGLE_APPS_SCRIPT_SECRET,
       requestId: id,
-      lead,
+      lead: {
+        ...lead,
+        message: "Preferred contact: Phone\nProperty type: Single Family",
+      },
     });
   });
   it("treats an acknowledged duplicate as success without generating a new ID", async () => {

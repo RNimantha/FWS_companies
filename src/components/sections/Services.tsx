@@ -157,7 +157,7 @@ export function ServicesSection({
           <div>
             <p className="eyebrow">OUR SERVICES</p>
             <h2 id="services-title">
-              Plumbing, electrical
+              Plumbing, Electrical
               <br />
               &amp; HVAC. One call.
             </h2>

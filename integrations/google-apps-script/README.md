@@ -29,9 +29,11 @@ The optional manifest can be pasted into `appsscript.json` after enabling manife
 
 ## Saved columns
 
-Submitted At, Request ID, Payload Hash, Full Name, Phone, Email, Service Code, Service Required, ZIP Code, Message, Status.
+Submitted At, Request ID, Payload Hash, Full Name, Phone, Email, Service Code, Service Required, ZIP Code, Message, Status, Preferred Contact, Property Type.
 
-Every customer-entered field is saved, including optional blank email/message. The honeypot is validated and intentionally not stored. Timestamp and `New` status are added automatically. Phone and ZIP are text to preserve leading zeros. Formula-like customer strings are escaped as literal text.
+Email is optional when Phone is selected and required when Email is selected. Property type is required and accepts Single Family, Multi Family, Commercial, Institutional or HOA. Every customer-entered field is saved, including an optional blank email. The honeypot is validated and intentionally not stored. Timestamp and `New` status are added automatically. Phone and ZIP are text to preserve leading zeros. Formula-like customer strings are escaped as literal text.
+
+The website backend also includes preferred contact and property type in the Message column, so the existing deployed receiver preserves these choices immediately. To get separate columns, paste the updated `Code.gs` into the existing Apps Script project and update its web-app deployment to a new version, keeping the same URL and Script Properties. The receiver appends the two headers to the existing 11-column layout without changing historical rows; running `setupSheet` performs the same safe migration. Existing rows have blank values in the new columns. Do not reorder or rename internal columns.
 
 Request ID is the browser's existing Idempotency-Key. A script lock serializes lookup and append. An identical retry returns success without a second row; a changed payload using the same ID is rejected. Duplicate protection lasts while the row/ID remains in this tab. Archive rather than delete IDs if retries must continue to deduplicate. Do not manually edit Request ID or Payload Hash.
 

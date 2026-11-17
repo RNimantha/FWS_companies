@@ -8,6 +8,8 @@ const body = {
   zip: "92870",
   message: "",
   website: "",
+  preferredContact: "Phone" as const,
+  propertyType: "Single Family" as const,
 };
 function setup() {
   const deps: LeadDependencies = {

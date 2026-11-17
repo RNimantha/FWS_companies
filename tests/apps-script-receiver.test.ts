@@ -18,6 +18,8 @@ const body = {
     zip: "02870",
     message: '=IMPORTXML("example")',
     website: "",
+    preferredContact: "Phone" as const,
+    propertyType: "Single Family" as const,
   },
 };
 function harness() {
@@ -152,6 +154,8 @@ describe("Apps Script receiver with Google service doubles", () => {
       "02870",
       '\'=IMPORTXML("example")',
       "New",
+      "Phone",
+      "Single Family",
     ]);
     expect(h.rows[1][2]).toMatch(/^[a-f0-9]{64}$/);
     expect(h.release).toHaveBeenCalledTimes(2);
@@ -191,4 +195,97 @@ describe("Apps Script receiver with Google service doubles", () => {
     expect(h.rows).toEqual([["Existing unrelated business data"]]);
     expect(h.release).toHaveBeenCalledOnce();
   });
+});
+
+it("safely extends legacy headers without changing old rows", () => {
+  const h = harness();
+  h.setup();
+  h.rows[0] = h.rows[0].slice(0, 11);
+  const oldRow = [
+    "Historical customer",
+    "historic-id",
+    "historic-hash",
+    "original data",
+  ];
+  h.rows.push([...oldRow]);
+  h.setup();
+  expect(h.rows[0].slice(11)).toEqual(["Preferred Contact", "Property Type"]);
+  expect(h.rows[1]).toEqual(oldRow);
+});
+it("preserves legacy duplicate receipts", () => {
+  const h = harness();
+  h.setup();
+  h.rows[0] = h.rows[0].slice(0, 11);
+  const legacy = {
+    name: body.lead.name,
+    phone: body.lead.phone,
+    email: body.lead.email,
+    service: body.lead.service,
+    zip: body.lead.zip,
+    message: body.lead.message,
+    website: "",
+  };
+  const hash = createHash("sha256")
+    .update(
+      JSON.stringify([
+        legacy.name,
+        legacy.phone,
+        legacy.email,
+        legacy.service,
+        legacy.zip,
+        legacy.message,
+      ]),
+    )
+    .digest("hex");
+  h.rows.push([new Date(), body.requestId, hash]);
+  expect(h.post({ ...body, lead: legacy }).duplicate).toBe(true);
+  expect(h.rows).toHaveLength(2);
+});
+it("rejects invalid preferences and changed property types on retry", () => {
+  const h = harness();
+  expect(
+    h.post({ ...body, lead: { ...body.lead, preferredContact: "SMS" } })
+      .accepted,
+  ).toBe(false);
+  expect(
+    h.post({
+      ...body,
+      lead: { ...body.lead, preferredContact: "Email", email: "" },
+    }).accepted,
+  ).toBe(false);
+  expect(
+    h.post({ ...body, lead: { ...body.lead, propertyType: "Other" } }).accepted,
+  ).toBe(false);
+  h.post(body);
+  expect(
+    h.post({ ...body, lead: { ...body.lead, propertyType: "HOA" } }).code,
+  ).toBe("IDEMPOTENCY_CONFLICT");
+});
+
+it("recognizes pre-upgrade receipts with matching compatibility metadata", () => {
+  const h = harness();
+  h.setup();
+  h.rows[0] = h.rows[0].slice(0, 11);
+  const lead = {
+    ...body.lead,
+    message: "Preferred contact: Phone\nProperty type: Single Family",
+  };
+  const hash = createHash("sha256")
+    .update(
+      JSON.stringify([
+        lead.name,
+        lead.phone,
+        lead.email,
+        lead.service,
+        lead.zip,
+        lead.message,
+      ]),
+    )
+    .digest("hex");
+  h.rows.push([new Date(), body.requestId, hash]);
+  expect(h.post({ ...body, lead }).duplicate).toBe(true);
+  expect(h.post({ ...body, lead: { ...lead, propertyType: "HOA" } }).code).toBe(
+    "IDEMPOTENCY_CONFLICT",
+  );
+  expect(h.rows).toHaveLength(2);
 });

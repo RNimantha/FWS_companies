@@ -12,6 +12,8 @@ export const business = {
   tel: "tel:+17144102728",
   email: "robert@fwccompanies.com",
   address: "2007 E Miraloma Ave, Placentia, CA 92870",
+  serviceArea:
+    "Servicing Orange County, Inland Empire, Riverside County & surrounding areas.",
   name: "FWC Plumbing & Rooter",
   slogan: "ONE CALL, WE DO IT ALL",
   secondarySlogan: "WE HANDLE PROBLEMS OTHERS CAN'T FIGURE OUT",

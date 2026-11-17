@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   LoaderCircle,
   Phone,
+  Mail,
   UserRound,
   MapPin,
   ClipboardList,
@@ -13,6 +14,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { leadSchema, submitLead, type Lead } from "../../lib/leads";
+import { propertyTypes, contactMethods } from "../../lib/lead-schema";
 import { services, business } from "../../data/content";
 import { track } from "../../lib/analytics";
 export function LeadForm({ selected }: { selected: string }) {
@@ -20,6 +22,8 @@ export function LeadForm({ selected }: { selected: string }) {
     register,
     handleSubmit,
     setValue,
+    watch,
+    clearErrors,
     formState: { errors, isSubmitting },
   } = useForm<Lead>({
     resolver: zodResolver(leadSchema),
@@ -27,12 +31,14 @@ export function LeadForm({ selected }: { selected: string }) {
       name: "",
       phone: "",
       email: "",
+      preferredContact: "Phone",
       service: "",
       zip: "",
       message: "",
       website: "",
     },
   });
+  const preferredContact = watch("preferredContact");
   const [status, setStatus] = useState("");
   const [success, setSuccess] = useState(false);
   const started = useRef(false);
@@ -44,7 +50,7 @@ export function LeadForm({ selected }: { selected: string }) {
     setStatus("");
     track("lead_form_submit", "estimate");
     try {
-      await submitLead({ ...values, email: "", message: "" }, key.current);
+      await submitLead({ ...values, message: "" }, key.current);
       setSuccess(true);
       track("lead_form_success", "estimate");
     } catch (e) {
@@ -155,7 +161,54 @@ export function LeadForm({ selected }: { selected: string }) {
               )}
             </div>
           ))}
+          <div className="field field-full">
+            <label htmlFor="email">
+              Email {preferredContact === "Email" ? "(required)" : "(optional)"}
+            </label>
+            <div className="input-shell">
+              <Mail size={17} aria-hidden="true" />
+              <input
+                id="email"
+                type="email"
+                autoComplete="email"
+                placeholder="you@example.com"
+                required={preferredContact === "Email"}
+                {...register("email")}
+                aria-invalid={!!errors.email}
+                aria-describedby={errors.email ? "email-error" : undefined}
+              />
+            </div>
+            {errors.email && (
+              <span className="field-error" id="email-error">
+                {errors.email.message}
+              </span>
+            )}
+          </div>
         </div>
+        <fieldset className="contact-preference">
+          <legend>Preferred method of contact</legend>
+          <div className="contact-options">
+            {contactMethods.map((method) => (
+              <label className="contact-option" key={method}>
+                <input
+                  type="radio"
+                  value={method}
+                  {...register("preferredContact", {
+                    onChange: () => clearErrors("email"),
+                  })}
+                />
+                <span>
+                  {method === "Phone" ? (
+                    <Phone size={16} aria-hidden="true" />
+                  ) : (
+                    <Mail size={16} aria-hidden="true" />
+                  )}
+                  {method}
+                </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
       </fieldset>
       <fieldset className="form-group project-form-group">
         <legend>
@@ -184,6 +237,33 @@ export function LeadForm({ selected }: { selected: string }) {
           {errors.service && (
             <span className="field-error" id="service-error">
               {errors.service.message}
+            </span>
+          )}
+        </div>
+        <div className="field">
+          <label htmlFor="propertyType">Property type</label>
+          <div className="select-shell">
+            <select
+              id="propertyType"
+              required
+              {...register("propertyType")}
+              aria-invalid={!!errors.propertyType}
+              aria-describedby={
+                errors.propertyType ? "propertyType-error" : undefined
+              }
+            >
+              <option value="">Select a property type</option>
+              {propertyTypes.map((type) => (
+                <option value={type} key={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+            <ChevronDown size={17} aria-hidden="true" />
+          </div>
+          {errors.propertyType && (
+            <span className="field-error" id="propertyType-error">
+              {errors.propertyType.message}
             </span>
           )}
         </div>
