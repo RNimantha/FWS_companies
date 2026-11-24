@@ -22,7 +22,7 @@ export function Header() {
       <div className="financing-banner">
         <div className="container">
           <span>WE OFFER FINANCING</span>
-          <a href="#financing">
+          <a href="/financing">
             Financing options <ArrowUpRight size={14} aria-hidden="true" />
           </a>
         </div>
@@ -30,10 +30,10 @@ export function Header() {
       <div className="container header-inner">
         <Brand />
         <nav aria-label="Main navigation" className="desktop-nav">
-          <a href="#services">Our services</a>
-          <a href="#who-we-serve">Who we serve</a>
-          <a href="#projects">Our work</a>
-          <a href="#faq">FAQs</a>
+          <a href="/services">Our services</a>
+          <a href="/who-we-serve">Who we serve</a>
+          <a href="/projects">Our work</a>
+          <a href="/faq">FAQs</a>
         </nav>
         <CallButton location="header" className="header-phone" />
         <ThemeToggle />
@@ -69,7 +69,7 @@ export function Header() {
             ["FAQs", "faq"],
             ["Get an estimate", "estimate"],
           ].map(([name, id]) => (
-            <a key={id} href={`#${id}`} onClick={() => setOpen(false)}>
+            <a key={id} href={`/${id}`} onClick={() => setOpen(false)}>
               {name}
               <ArrowUpRight size={16} />
             </a>

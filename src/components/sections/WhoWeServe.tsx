@@ -55,7 +55,7 @@ export function WhoWeServe() {
             </article>
           ))}
         </div>
-        <a className="text-link" href="#estimate">
+        <a className="text-link" href="/estimate">
           Tell us about your property <ArrowUpRight size={17} />
         </a>
       </div>

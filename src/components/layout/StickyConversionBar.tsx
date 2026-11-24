@@ -34,7 +34,7 @@ export function StickyConversionBar() {
             label="Call Now"
             sublabel={business.phone}
           />
-          <a className="smart-bar-estimate" href="#estimate">
+          <a className="smart-bar-estimate" href="/estimate">
             Get an Estimate
             <ArrowUpRight size={17} aria-hidden="true" />
           </a>

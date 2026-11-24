@@ -21,11 +21,13 @@ import { ServicesSection } from "./components/sections/Services";
 import { LeadForm } from "./components/forms/LeadForm";
 import { faqs } from "./data/content";
 import { MotionProvider } from "./lib/motion";
+import { useSectionNavigation } from "./hooks/useSectionNavigation";
 export default function App() {
+  useSectionNavigation();
   const [selected, setSelected] = useState("");
   return (
     <MotionProvider>
-      <a className="skip-link" href="#main">
+      <a className="skip-link" href="/main">
         Skip to content
       </a>
       <div id="top" />
@@ -92,7 +94,7 @@ export default function App() {
                   </p>
                 </div>
               </div>
-              <a className="text-link" href="#estimate">
+              <a className="text-link" href="/estimate">
                 Let’s discuss your project <ArrowUpRight size={17} />
               </a>
             </div>
@@ -105,7 +107,7 @@ export default function App() {
                 <p className="eyebrow">A CLOSER LOOK</p>
                 <h2>Real work. Real attention to detail.</h2>
               </div>
-              <a className="text-link" href="#estimate">
+              <a className="text-link" href="/estimate">
                 Have a project in mind? <ArrowUpRight size={17} />
               </a>
             </div>
@@ -137,7 +139,7 @@ export default function App() {
                 </div>
                 <a
                   className="text-link"
-                  href="#estimate"
+                  href="/estimate"
                   onClick={() => setSelected("plumbing")}
                 >
                   Discuss a similar project <ArrowUpRight size={17} />

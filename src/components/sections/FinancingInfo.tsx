@@ -18,7 +18,7 @@ export function FinancingInfo() {
           Ask our team about available financing options and the current terms
           for your project.
         </p>
-        <a className="text-link" href="#estimate">
+        <a className="text-link" href="/estimate">
           Ask about financing <ArrowUpRight size={17} />
         </a>
       </div>

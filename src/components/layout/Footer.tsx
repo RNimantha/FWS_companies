@@ -33,10 +33,10 @@ export function Footer() {
           </div>
           <div>
             <h3>Explore</h3>
-            <a href="#services">Our services</a>
-            <a href="#who-we-serve">Who we serve</a>
-            <a href="#projects">Our work</a>
-            <a href="#credentials">Credentials</a>
+            <a href="/services">Our services</a>
+            <a href="/who-we-serve">Who we serve</a>
+            <a href="/projects">Our work</a>
+            <a href="/credentials">Credentials</a>
             <a
               href="https://www.instagram.com/fwccompaniesllc/"
               target="_blank"

@@ -301,7 +301,7 @@ export function LeadForm({ selected }: { selected: string }) {
         <LockKeyhole size={13} aria-hidden="true" />
         <span>
           By submitting, you ask FWC to contact you about this request. See our{" "}
-          <a href="#privacy">privacy information</a>.
+          <a href="/privacy">privacy information</a>.
         </span>
       </p>
       <a className="form-call" href={business.tel}>

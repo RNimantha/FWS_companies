@@ -9,3 +9,103 @@
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
+
+[[redirects]]
+  from = "/main"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/main/"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/estimate"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/estimate/"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/services"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/services/"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/who-we-serve"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/who-we-serve/"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/why-fwc"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/why-fwc/"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/projects"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/projects/"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/faq"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/faq/"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/financing"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/financing/"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/credentials"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/credentials/"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/privacy"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/privacy/"
+  to = "/index.html"
+  status = 200

@@ -112,7 +112,7 @@ function ServiceCard({
       </div>
       <div className="svc-body">
         <ItemList items={s.items} />
-        <a href="#estimate" className="svc-cta" onClick={() => onSelect(s.id)}>
+        <a href="/estimate" className="svc-cta" onClick={() => onSelect(s.id)}>
           {ctaLabel[s.id]}
           <ArrowRight size={17} aria-hidden="true" />
         </a>
@@ -135,7 +135,7 @@ export function ServicesSection({
   const chip = (p: (typeof problems)[number], hidden = false) => (
     <li key={`${p.label}${hidden ? "-dup" : ""}`}>
       <a
-        href="#estimate"
+        href="/estimate"
         className="svc-chip"
         onClick={() => onSelect(p.service)}
         tabIndex={hidden ? -1 : undefined}

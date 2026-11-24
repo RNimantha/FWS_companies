@@ -13,7 +13,7 @@ export function EstimateButton({
   return (
     <a
       className={`button ${light ? "button-white" : "button-red"}`}
-      href="#estimate"
+      href="/estimate"
       onClick={() => {
         if (location === "hero") track("hero_cta_click", location);
       }}
@@ -55,7 +55,7 @@ export function CallButton({
 }
 export function Brand() {
   return (
-    <a className="brand" href="#top" aria-label="FWC Plumbing & Rooter home">
+    <a className="brand" href="/" aria-label="FWC Plumbing & Rooter home">
       <span className="brand-image">
         <img
           src="/lofwc.jpeg"

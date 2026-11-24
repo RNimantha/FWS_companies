@@ -63,7 +63,7 @@ export function HeroSection() {
       </div>
       <div className="hero-bottom container">
         <span>{business.secondarySlogan}</span>
-        <a href="#services">
+        <a href="/services">
           EXPLORE OUR SERVICES <ArrowDown size={15} />
         </a>
       </div>
