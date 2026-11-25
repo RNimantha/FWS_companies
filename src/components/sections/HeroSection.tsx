@@ -43,12 +43,10 @@ export function HeroSection() {
         </div>
         <div className="hero-visual">
           <img
-            src="/assets/images/fwc-truck-clean.jpg"
-            srcSet="/assets/images/fwc-truck-800.webp 800w, /assets/images/fwc-truck-1300.webp 1300w"
-            sizes="(min-width: 1000px) 560px, (min-width: 600px) 700px, calc(100vw - 40px)"
-            alt="FWC Plumbing & Rooter company truck with black, red and silver branding, service list and 714-410-2728 phone number"
-            width="1300"
-            height="800"
+            src="/assets/images/hero_image/hero.jpg"
+            alt="FWC Plumbing & Rooter team standing beside branded service trucks outside the company building"
+            width="1600"
+            height="1200"
             fetchPriority="high"
           />
           <div className="photo-label">

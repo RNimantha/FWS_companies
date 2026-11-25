@@ -76,3 +76,26 @@ Send one clearly marked test request through the configured backend and check th
 Google Apps Script and Sheets have service quotas; monitor execution failures and revisit the append/lookup design as volume grows. No live Google account was accessed and no test row was created as part of this repository change.
 
 References: [Google web-app deployment](https://developers.google.com/apps-script/guides/web), [ContentService and redirects](https://developers.google.com/apps-script/guides/content), [LockService](https://developers.google.com/apps-script/reference/lock/lock-service).
+
+
+## Branded lead emails
+
+After saving each new lead, the receiver sends an HTML notification with a plain-text fallback to **nimantabandara@gmail.com**. If the customer supplied an email, it also sends a matching confirmation. Both templates use the FWC black, red, white and silver identity and display all submitted fields. The customer template does not include the private Sheet link. Customer-entered HTML is escaped.
+
+### Enable on the existing deployment
+
+1. Replace the existing Apps Script `Code.gs` with this folder's updated file.
+2. If the project uses explicit scopes in `appsscript.json`, add `https://www.googleapis.com/auth/script.send_mail` alongside the Sheets scope (the supplied manifest already includes both). If scopes are automatic, Google detects MailApp from the code.
+3. Save, select **authorizeEmail**, and click **Run** as the account that owns the deployment. Approve the email permission. This authorization function sends no email.
+4. Choose **Deploy > Manage deployments > Edit > New version > Deploy** on the existing web-app deployment. Keep its `/exec` URL, Script Properties and Execute-as-owner setting unchanged. Website environment variables do not change.
+5. Submit a clearly labeled test lead with an email address. Confirm the Sheet row, the team email, and the customer confirmation (including spam folders). Do not test by clicking Run on `doPost`: it expects an HTTP event.
+
+Mail is sent from the Google account executing the deployment, with the display name **FWC Plumbing & Rooter**. The team email's Reply-To is the customer address when supplied; customer replies go to **nimantabandara@gmail.com**. This does not configure a custom-domain From address.
+
+Hover over the new row's **Status** cell to see its email-delivery note: Team/Customer `sent`, `failed`, `quota exhausted`, or customer `not provided`. `sent` means MailApp accepted the send; it does not guarantee inbox placement. Leads remain accepted and saved even if mail fails. Duplicate requests and historical rows do not trigger emails. Failed messages are not automatically resent; follow up from the saved lead. A process interruption after saving can leave no delivery note or incomplete email delivery, so the Sheet remains the source of truth. No email queue or delivery webhook is included.
+
+The team notification gets priority when quota is low. Google applies per-account mail quotas; each new lead normally consumes two recipient sends, or one if no email was supplied. Monitor Status notes and Apps Script executions. No live emails were sent while implementing or testing this change.
+
+Reference: [Google MailApp, permissions and send options](https://developers.google.com/apps-script/reference/mail/mail-app).
+
+Email copy now uses normal-case headings, a dark button and an explicitly labeled website link for customers. The company phone appears once in customer guidance, without a repeated phone CTA or urgent wording. These presentation changes do not establish the cause of spam classification or guarantee inbox delivery; sender authentication and recipient filtering still require verification.

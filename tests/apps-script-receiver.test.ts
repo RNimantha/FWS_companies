@@ -24,6 +24,10 @@ const body = {
 };
 function harness() {
   const rows: unknown[][] = [];
+  const notes = new Map<string, string>();
+  const sendEmail = vi.fn();
+  const quota = vi.fn(() => 100);
+  const warn = vi.fn();
   const properties = new Map([
     ["SPREADSHEET_ID", "test-sheet"],
     ["SHARED_SECRET", secret],
@@ -50,6 +54,10 @@ function harness() {
       },
       getValue() {
         return rows[row - 1]?.[col - 1];
+      },
+      setNote(value: string) {
+        notes.set(`${row}:${col}`, value);
+        return this;
       },
       setNumberFormat() {
         return this;
@@ -89,6 +97,8 @@ function harness() {
     setFrozenRows: vi.fn(),
   };
   const context = {
+    console: { warn },
+    MailApp: { sendEmail, getRemainingDailyQuota: quota },
     PropertiesService: {
       getScriptProperties: () => ({
         getProperty: (key: string) => properties.get(key) ?? null,
@@ -133,7 +143,17 @@ function harness() {
         postData: { type: "application/json", contents: JSON.stringify(data) },
       }).text,
     );
-  return { rows, post, properties, release, setup: () => script.setupSheet() };
+  return {
+    rows,
+    notes,
+    sendEmail,
+    quota,
+    warn,
+    post,
+    properties,
+    release,
+    setup: () => script.setupSheet(),
+  };
 }
 describe("Apps Script receiver with Google service doubles", () => {
   it("creates headers and saves every field as a new row, escaping formula-like values", () => {
@@ -288,4 +308,112 @@ it("recognizes pre-upgrade receipts with matching compatibility metadata", () =>
     "IDEMPOTENCY_CONFLICT",
   );
   expect(h.rows).toHaveLength(2);
+});
+
+it("emails the team and customer once, with branded HTML and plain text", () => {
+  const h = harness();
+  const payload = {
+    ...body,
+    lead: {
+      ...body.lead,
+      email: "customer@example.com",
+      preferredContact: "Email",
+    },
+  };
+  expect(h.post(payload).accepted).toBe(true);
+  expect(h.sendEmail).toHaveBeenCalledTimes(2);
+  const [admin, customer] = h.sendEmail.mock.calls.map(([mail]) => mail);
+  expect(admin.to).toBe("nimantabandara@gmail.com");
+  expect(admin.replyTo).toBe("customer@example.com");
+  expect(admin.htmlBody).toContain("View leads in Google Sheets");
+  expect(customer.to).toBe("customer@example.com");
+  expect(customer.replyTo).toBe("nimantabandara@gmail.com");
+  expect(customer.htmlBody).toContain("Your request is in.");
+  expect(customer.htmlBody).not.toContain("docs.google.com");
+  expect(customer.htmlBody).toContain('href="https://fwccompanies.services"');
+  expect(customer.htmlBody).toContain('bgcolor="#101010"');
+  expect(customer.htmlBody).not.toContain("tel:");
+  expect(customer.htmlBody).not.toContain("For urgent help");
+  expect(customer.htmlBody).not.toContain("ONE CALL, WE DO IT ALL");
+  expect(customer.body).toMatch(/^FWC Plumbing & Rooter\n/);
+  expect(customer.body.match(/714-410-2728/g)).toHaveLength(1);
+  expect(customer.htmlBody.match(/714-410-2728/g)).toHaveLength(1);
+  for (const mail of [admin, customer]) {
+    expect(mail.name).toBe("FWC Plumbing & Rooter");
+    expect(mail.htmlBody).toContain("#E51C35");
+    expect(mail.htmlBody).toContain("Single Family");
+    expect(mail.htmlBody).not.toContain(secret);
+    expect(mail.body).toContain("Request reference: " + body.requestId);
+  }
+  expect(h.notes.get("2:11")).toBe(
+    "Email delivery: Team: sent; Customer: sent",
+  );
+  expect(h.post(payload).duplicate).toBe(true);
+  expect(h.sendEmail).toHaveBeenCalledTimes(2);
+});
+
+it("notifies only the team when no customer email is provided", () => {
+  const h = harness();
+  expect(h.post(body).accepted).toBe(true);
+  expect(h.sendEmail).toHaveBeenCalledOnce();
+  expect(h.sendEmail.mock.calls[0][0].to).toBe("nimantabandara@gmail.com");
+  expect(h.notes.get("2:11")).toContain("Customer: not provided");
+});
+
+it("escapes customer HTML and strips only the matching compatibility suffix", () => {
+  const h = harness();
+  h.post({
+    ...body,
+    lead: {
+      ...body.lead,
+      name: '<img src=x onerror="alert(1)">',
+      message:
+        "<script>bad()</script>\nPreferred contact: Phone\nProperty type: Single Family",
+    },
+  });
+  const mail = h.sendEmail.mock.calls[0][0];
+  expect(mail.htmlBody).toContain("&lt;img");
+  expect(mail.htmlBody).toContain("&lt;script&gt;");
+  expect(mail.htmlBody).not.toContain("<script>");
+  expect(mail.body).toContain("Project details: <script>bad()</script>");
+  expect(mail.body.match(/Preferred contact: Phone/g)).toHaveLength(1);
+  expect(mail.body).toContain(
+    "Project details: <script>bad()</script>\nRequest reference:",
+  );
+});
+
+it("preserves saved leads on email failure, records status and avoids duplicate mail retries", () => {
+  const h = harness();
+  h.sendEmail.mockImplementationOnce(() => {
+    throw new Error("Provider unavailable");
+  });
+  const payload = {
+    ...body,
+    lead: { ...body.lead, email: "customer@example.com" },
+  };
+  expect(h.post(payload).accepted).toBe(true);
+  expect(h.rows).toHaveLength(2);
+  expect(h.notes.get("2:11")).toBe(
+    "Email delivery: Team: failed; Customer: sent",
+  );
+  expect(h.post(payload).duplicate).toBe(true);
+  expect(h.sendEmail).toHaveBeenCalledTimes(2);
+});
+
+it("records exhausted mail quota without rejecting the saved lead", () => {
+  const h = harness();
+  h.quota.mockReturnValue(0);
+  expect(h.post(body).accepted).toBe(true);
+  expect(h.sendEmail).not.toHaveBeenCalled();
+  expect(h.notes.get("2:11")).toContain("Team: quota exhausted");
+});
+
+it("sends no emails for rejected requests or idempotency conflicts", () => {
+  const h = harness();
+  h.post({ ...body, secret: "wrong" });
+  h.post({ ...body, lead: { ...body.lead, website: "spam" } });
+  expect(h.sendEmail).not.toHaveBeenCalled();
+  h.post(body);
+  h.post({ ...body, lead: { ...body.lead, propertyType: "HOA" } });
+  expect(h.sendEmail).toHaveBeenCalledOnce();
 });

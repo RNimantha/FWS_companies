@@ -73,6 +73,16 @@ function doPost(e) {
     ]]);
     sheet.getRange(row, 1).setNumberFormat('yyyy-mm-dd hh:mm:ss');
     SpreadsheetApp.flush();
+    // The saved receipt is authoritative. Release the lock before slow mail calls.
+    lock.releaseLock();
+    locked = false;
+    try {
+      var delivery = fwcNotify_(lead, settings);
+      sheet.getRange(row, 11).setNote('Email delivery: ' + delivery);
+    } catch (mailError) {
+      // Email/notes must never turn a durable save into a failed submission.
+      console.warn('FWC email notification or delivery note failed; lead remains saved.');
+    }
     return fwcJson_({ accepted: true, requestId: lead.requestId, duplicate: false });
   } catch (ignored) {
     // Never return or log lead contents, secrets or internal Google errors.
@@ -185,4 +195,79 @@ function fwcAllowWrite_() {
 
 function fwcJson_(data) {
   return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON);
+}
+
+/** Run once after updating the script to grant the new email permission. Sends no email. */
+function authorizeEmail() {
+  MailApp.getRemainingDailyQuota();
+}
+
+function fwcNotify_(lead, settings) {
+  var inbox = 'nimantabandara@gmail.com';
+  var admin = fwcEmail_(lead, settings, false);
+  var customer = fwcEmail_(lead, settings, true);
+  function send(to, replyTo, email) {
+    try {
+      if (MailApp.getRemainingDailyQuota() < 1) return 'quota exhausted';
+      MailApp.sendEmail({
+        to: to, replyTo: replyTo, name: 'FWC Plumbing & Rooter',
+        subject: email.subject, body: email.text, htmlBody: email.html
+      });
+      return 'sent';
+    } catch (ignored) {
+      console.warn('FWC email send failed; lead remains saved.');
+      return 'failed';
+    }
+  }
+  var adminStatus = send(inbox, lead.email || inbox, admin);
+  var customerStatus = lead.email ? send(lead.email, inbox, customer) : 'not provided';
+  return 'Team: ' + adminStatus + '; Customer: ' + customerStatus;
+}
+
+function fwcEscapeHtml_(value) {
+  return String(value).replace(/[&<>"']/g, function (character) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character];
+  });
+}
+
+function fwcEmail_(lead, settings, customer) {
+  var subject = customer ? 'We received your estimate request | FWC Plumbing & Rooter' : 'New estimate request | FWC Plumbing & Rooter';
+  var title = customer ? 'Your request is in.' : 'A new lead just arrived.';
+  var intro = customer
+    ? 'Thank you for contacting FWC Plumbing & Rooter. We have received your estimate request, and our team will review your details and contact you using your preferred method.'
+    : 'A new website estimate request has been saved to Google Sheets. Review the details below and follow up using the customer’s preferred contact method.';
+  var fields = [
+    ['Full name', lead.name], ['Phone', lead.phone], ['Email', lead.email || 'Not provided'],
+    ['Preferred contact', lead.preferredContact], ['Property type', lead.propertyType || 'Not provided'],
+    ['Service', FWC_SERVICES[lead.service]], ['ZIP code', lead.zip]
+  ];
+  var suffix = 'Preferred contact: ' + lead.preferredContact + '\nProperty type: ' + lead.propertyType;
+  var message = lead.message === suffix ? '' : lead.message;
+  if (message.slice(-(suffix.length + 1)) === '\n' + suffix) message = message.slice(0, -(suffix.length + 1));
+  if (message) fields.push(['Project details', message]);
+  fields.push(['Request reference', lead.requestId]);
+  var rows = fields.map(function (field) {
+    return '<tr><th scope="row" align="left" valign="top" style="padding:13px 16px;border-bottom:1px solid #e9e9ed;font-size:13px;font-weight:600;color:#595961;width:38%">' + fwcEscapeHtml_(field[0]) + '</th><td valign="top" style="padding:13px 16px;border-bottom:1px solid #e9e9ed;font-size:14px;color:#101010;overflow-wrap:anywhere;word-break:break-word">' + fwcEscapeHtml_(field[1]).replace(/\n/g, '<br>') + '</td></tr>';
+  }).join('');
+  var site = 'https://fwccompanies.services';
+  var ctaUrl = customer ? site : 'https://docs.google.com/spreadsheets/d/' + encodeURIComponent(settings.id) + '/edit';
+  var ctaText = customer ? 'Visit fwccompanies.services' : 'View leads in Google Sheets';
+  var next = customer
+    ? 'If you would like to reach us sooner, you can call 714-410-2728. This email confirms that we received your request; it does not confirm an appointment.'
+    : 'Reply to this email to contact the customer when an email address was provided. Otherwise, use the phone number above.';
+  var label = customer ? 'Estimate request received' : 'New website lead';
+  var text = 'FWC Plumbing & Rooter\n\n' + title + '\n' + intro + '\n\n' +
+    fields.map(function (field) { return field[0] + ': ' + field[1]; }).join('\n') +
+    '\n\n' + next + '\n' + ctaText + ': ' + ctaUrl + '\n\nFWC Plumbing & Rooter\nfwccompanies.services';
+  var html = '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + fwcEscapeHtml_(subject) + '</title></head>' +
+    '<body style="margin:0;padding:0;background:#f2f3f5;font-family:Arial,Helvetica,sans-serif;color:#101010">' +
+    '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f2f3f5"><tr><td align="center" style="padding:24px 12px"><table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:100%;max-width:600px;background:#ffffff;border:1px solid #e0e1e5;border-radius:16px;overflow:hidden">' +
+    '<tr><td style="padding:26px 24px;background:#101010;border-top:4px solid #E51C35"><p style="margin:0;color:#ffffff;font-size:20px;font-weight:700">FWC Plumbing &amp; Rooter</p></td></tr>' +
+    '<tr><td style="padding:28px 24px"><p style="margin:0 0 10px;color:#595961;font-size:13px;font-weight:700">' + label + '</p><h1 style="margin:0 0 16px;font-size:26px;line-height:1.25">' + title + '</h1><p style="margin:0 0 24px;font-size:15px;line-height:1.7;color:#3f3f46">' + intro + '</p>' +
+    '<table aria-label="Estimate request details" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e9e9ed;border-radius:10px;border-collapse:collapse;table-layout:fixed">' + rows + '</table>' +
+    '<p style="margin:24px 0;font-size:14px;line-height:1.7;color:#3f3f46">' + next + '</p>' +
+    '<table role="presentation" cellpadding="0" cellspacing="0"><tr><td bgcolor="#101010" style="border-radius:8px"><a href="' + fwcEscapeHtml_(ctaUrl) + '" style="display:inline-block;padding:14px 22px;font-size:14px;font-weight:700;color:#ffffff;text-decoration:none">' + ctaText + '</a></td></tr></table></td></tr>' +
+    '<tr><td style="padding:20px 24px;background:#fafafa;border-top:1px solid #e9e9ed;font-size:12px;line-height:1.8;color:#595961"><strong style="color:#101010">FWC Plumbing &amp; Rooter</strong><br><a href="' + site + '" style="color:#101010">fwccompanies.services</a><br>You are receiving this because an estimate request was submitted on our website.</td></tr>' +
+    '</table></td></tr></table></body></html>';
+  return { subject: subject, text: text, html: html };
 }

@@ -477,7 +477,7 @@ h1 > span {
 .hero-visual > img {
   width: 100%;
   height: auto;
-  aspect-ratio: 13/8;
+  aspect-ratio: 4/3;
   object-fit: contain;
 }
 .photo-label {
