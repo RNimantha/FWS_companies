@@ -22,8 +22,24 @@ const body = {
     propertyType: "Single Family" as const,
   },
 };
+const legacyHeaders = [
+  "Submitted At",
+  "Request ID",
+  "Payload Hash",
+  "Full Name",
+  "Phone",
+  "Email",
+  "Service Code",
+  "Service Required",
+  "ZIP Code",
+  "Message",
+  "Status",
+  "Preferred Contact",
+  "Property Type",
+];
 function harness() {
   const rows: unknown[][] = [];
+  const receiptRows: unknown[][] = [];
   const notes = new Map<string, string>();
   const sendEmail = vi.fn();
   const quota = vi.fn(() => 100);
@@ -33,13 +49,19 @@ function harness() {
     ["SHARED_SECRET", secret],
   ]);
   const release = vi.fn();
-  function range(row: number, col: number, height = 1, width = 1) {
+  function range(
+    row: number,
+    col: number,
+    height = 1,
+    width = 1,
+    sheetRows = rows,
+  ) {
     return {
       setValues(values: unknown[][]) {
         values.forEach((line, i) => {
-          rows[row - 1 + i] ??= [];
+          sheetRows[row - 1 + i] ??= [];
           line.forEach((value, j) => {
-            rows[row - 1 + i][col - 1 + j] = value;
+            sheetRows[row - 1 + i][col - 1 + j] = value;
           });
         });
         return this;
@@ -48,12 +70,12 @@ function harness() {
         return Array.from({ length: height }, (_, i) =>
           Array.from(
             { length: width },
-            (_, j) => rows[row - 1 + i]?.[col - 1 + j],
+            (_, j) => sheetRows[row - 1 + i]?.[col - 1 + j],
           ),
         );
       },
       getValue() {
-        return rows[row - 1]?.[col - 1];
+        return sheetRows[row - 1]?.[col - 1];
       },
       setNote(value: string) {
         notes.set(`${row}:${col}`, value);
@@ -80,7 +102,7 @@ function harness() {
             return this;
           },
           findNext() {
-            const index = rows.findIndex(
+            const index = sheetRows.findIndex(
               (line, i) => i >= row - 1 && line[col - 1] === value,
             );
             return index < 0 ? null : { getRow: () => index + 1 };
@@ -95,7 +117,21 @@ function harness() {
     getMaxColumns: () => 26,
     getMaxRows: () => 1000,
     setFrozenRows: vi.fn(),
+    deleteColumns: vi.fn((start: number, count: number) =>
+      rows.forEach((row) => row.splice(start - 1, count)),
+    ),
   };
+  const receiptSheet = {
+    getRange: (row: number, col: number, height = 1, width = 1) =>
+      range(row, col, height, width, receiptRows),
+    getLastRow: () => receiptRows.length,
+    getMaxRows: () => 1000,
+    setFrozenRows: vi.fn(),
+    hideSheet: vi.fn(),
+  };
+  const sheets = new Map<string, typeof sheet | typeof receiptSheet>([
+    ["Website Leads", sheet],
+  ]);
   const context = {
     console: { warn },
     MailApp: { sendEmail, getRemainingDailyQuota: quota },
@@ -106,7 +142,13 @@ function harness() {
       }),
     },
     SpreadsheetApp: {
-      openById: () => ({ getSheetByName: () => sheet }),
+      openById: () => ({
+        getSheetByName: (name: string) => sheets.get(name) || null,
+        insertSheet: (name: string) => {
+          sheets.set(name, receiptSheet);
+          return receiptSheet;
+        },
+      }),
       flush: vi.fn(),
     },
     LockService: {
@@ -145,6 +187,9 @@ function harness() {
     );
   return {
     rows,
+    receiptRows,
+    receiptSheet,
+    sheet,
     notes,
     sendEmail,
     quota,
@@ -165,7 +210,7 @@ describe("Apps Script receiver with Google service doubles", () => {
       duplicate: false,
     });
     expect(h.rows).toHaveLength(2);
-    expect(h.rows[1].slice(3)).toEqual([
+    expect(h.rows[1].slice(1)).toEqual([
       "Test Customer",
       "'+17145550123",
       "",
@@ -177,7 +222,7 @@ describe("Apps Script receiver with Google service doubles", () => {
       "Phone",
       "Single Family",
     ]);
-    expect(h.rows[1][2]).toMatch(/^[a-f0-9]{64}$/);
+    expect(h.receiptRows[1][1]).toMatch(/^[a-f0-9]{64}$/);
     expect(h.release).toHaveBeenCalledTimes(2);
   });
   it("deduplicates an identical retry and rejects changed content for that ID", () => {
@@ -220,22 +265,29 @@ describe("Apps Script receiver with Google service doubles", () => {
 it("safely extends legacy headers without changing old rows", () => {
   const h = harness();
   h.setup();
-  h.rows[0] = h.rows[0].slice(0, 11);
+  h.rows[0] = legacyHeaders.slice(0, 11);
   const oldRow = [
-    "Historical customer",
+    new Date(),
     "historic-id",
     "historic-hash",
+    "Historical customer",
     "original data",
   ];
   h.rows.push([...oldRow]);
   h.setup();
-  expect(h.rows[0].slice(11)).toEqual(["Preferred Contact", "Property Type"]);
-  expect(h.rows[1]).toEqual(oldRow);
+  expect(h.rows[0].slice(9)).toEqual(["Preferred Contact", "Property Type"]);
+  expect(h.rows[1]).toEqual([oldRow[0], ...oldRow.slice(3)]);
+  expect(h.receiptRows[1]).toEqual([
+    "historic-id",
+    "historic-hash",
+    2,
+    "Saved",
+  ]);
 });
 it("preserves legacy duplicate receipts", () => {
   const h = harness();
   h.setup();
-  h.rows[0] = h.rows[0].slice(0, 11);
+  h.rows[0] = legacyHeaders.slice(0, 11);
   const legacy = {
     name: body.lead.name,
     phone: body.lead.phone,
@@ -285,7 +337,7 @@ it("rejects invalid preferences and changed property types on retry", () => {
 it("recognizes pre-upgrade receipts with matching compatibility metadata", () => {
   const h = harness();
   h.setup();
-  h.rows[0] = h.rows[0].slice(0, 11);
+  h.rows[0] = legacyHeaders.slice(0, 11);
   const lead = {
     ...body.lead,
     message: "Preferred contact: Phone\nProperty type: Single Family",
@@ -325,7 +377,16 @@ it("emails the team and customer once, with branded HTML and plain text", () => 
   const [admin, customer] = h.sendEmail.mock.calls.map(([mail]) => mail);
   expect(admin.to).toBe("nimantabandara@gmail.com");
   expect(admin.replyTo).toBe("customer@example.com");
-  expect(admin.htmlBody).toContain("View leads in Google Sheets");
+  expect(admin.htmlBody).not.toContain("docs.google.com");
+  expect(admin.htmlBody).toContain('href="mailto:customer%40example.com"');
+  expect(admin.htmlBody).toContain('href="tel:+17145550123"');
+  expect(admin.htmlBody).toContain("Reply to lead");
+  expect(admin.htmlBody).toContain("Call now");
+  expect(admin.body).toContain("Reply to lead: mailto:customer%40example.com");
+  expect(admin.body).toContain("Call now: tel:+17145550123");
+  expect(admin.htmlBody).toContain(
+    "A new website estimate has been requested, the customer’s information is below please contact them immediately",
+  );
   expect(customer.to).toBe("customer@example.com");
   expect(customer.replyTo).toBe("nimantabandara@gmail.com");
   expect(customer.htmlBody).toContain("Your request is in.");
@@ -345,9 +406,7 @@ it("emails the team and customer once, with branded HTML and plain text", () => 
     expect(mail.htmlBody).not.toContain(secret);
     expect(mail.body).toContain("Request reference: " + body.requestId);
   }
-  expect(h.notes.get("2:11")).toBe(
-    "Email delivery: Team: sent; Customer: sent",
-  );
+  expect(h.notes.get("2:9")).toBe("Email delivery: Team: sent; Customer: sent");
   expect(h.post(payload).duplicate).toBe(true);
   expect(h.sendEmail).toHaveBeenCalledTimes(2);
 });
@@ -357,7 +416,9 @@ it("notifies only the team when no customer email is provided", () => {
   expect(h.post(body).accepted).toBe(true);
   expect(h.sendEmail).toHaveBeenCalledOnce();
   expect(h.sendEmail.mock.calls[0][0].to).toBe("nimantabandara@gmail.com");
-  expect(h.notes.get("2:11")).toContain("Customer: not provided");
+  expect(h.notes.get("2:9")).toContain("Customer: not provided");
+  expect(h.sendEmail.mock.calls[0][0].htmlBody).not.toContain("mailto:");
+  expect(h.sendEmail.mock.calls[0][0].htmlBody).toContain("Call now");
 });
 
 it("escapes customer HTML and strips only the matching compatibility suffix", () => {
@@ -393,7 +454,7 @@ it("preserves saved leads on email failure, records status and avoids duplicate 
   };
   expect(h.post(payload).accepted).toBe(true);
   expect(h.rows).toHaveLength(2);
-  expect(h.notes.get("2:11")).toBe(
+  expect(h.notes.get("2:9")).toBe(
     "Email delivery: Team: failed; Customer: sent",
   );
   expect(h.post(payload).duplicate).toBe(true);
@@ -405,7 +466,7 @@ it("records exhausted mail quota without rejecting the saved lead", () => {
   h.quota.mockReturnValue(0);
   expect(h.post(body).accepted).toBe(true);
   expect(h.sendEmail).not.toHaveBeenCalled();
-  expect(h.notes.get("2:11")).toContain("Team: quota exhausted");
+  expect(h.notes.get("2:9")).toContain("Team: quota exhausted");
 });
 
 it("sends no emails for rejected requests or idempotency conflicts", () => {
@@ -415,5 +476,93 @@ it("sends no emails for rejected requests or idempotency conflicts", () => {
   expect(h.sendEmail).not.toHaveBeenCalled();
   h.post(body);
   h.post({ ...body, lead: { ...body.lead, propertyType: "HOA" } });
+  expect(h.sendEmail).toHaveBeenCalledOnce();
+});
+
+it("keeps internal identifiers out of the visible sheet and hides receipts", () => {
+  const h = harness();
+  h.post(body);
+  expect(h.rows[0]).not.toContain("Request ID");
+  expect(h.rows[0]).not.toContain("Payload Hash");
+  expect(h.rows[1]).not.toContain(body.requestId);
+  expect(h.receiptRows[1][0]).toBe(body.requestId);
+  expect(h.receiptRows[1].slice(2)).toEqual([2, "Saved"]);
+  expect(h.receiptSheet.hideSheet).toHaveBeenCalled();
+});
+
+it("migrates all 13 legacy columns without changing customer data or duplicating receipts", () => {
+  const h = harness();
+  h.post(body);
+  const visible = [...h.rows[1]];
+  h.rows[0] = [...legacyHeaders];
+  h.rows[1] = [
+    visible[0],
+    h.receiptRows[1][0],
+    h.receiptRows[1][1],
+    ...visible.slice(1),
+  ];
+  h.setup();
+  h.setup();
+  expect(h.rows[1]).toEqual(visible);
+  expect(h.rows[0]).toHaveLength(11);
+  expect(h.receiptRows).toHaveLength(2);
+  expect(h.post(body).duplicate).toBe(true);
+});
+
+it("does not delete legacy columns when copying receipts fails, and safely resumes", () => {
+  const h = harness();
+  h.rows.push(
+    [...legacyHeaders],
+    [new Date(), body.requestId, "old-hash", "Customer"],
+  );
+  const original = h.receiptSheet.getRange;
+  const spy = vi
+    .spyOn(h.receiptSheet, "getRange")
+    .mockImplementation((...args) => {
+      const range = original(...args);
+      if (args[0] === 2 && args[1] === 1)
+        return {
+          ...range,
+          setValues: () => {
+            throw new Error("Storage interrupted");
+          },
+        };
+      return range;
+    });
+  expect(() => h.setup()).toThrow();
+  expect(h.sheet.deleteColumns).not.toHaveBeenCalled();
+  expect(h.rows[0]).toEqual(legacyHeaders);
+  spy.mockRestore();
+  h.setup();
+  expect(h.rows[1]).toEqual([expect.any(Date), "Customer"]);
+  expect(h.receiptRows[1]).toEqual([body.requestId, "old-hash", 2, "Saved"]);
+});
+
+it("recovers an interrupted visible write using the same reserved row", () => {
+  const h = harness();
+  h.setup();
+  const original = h.sheet.getRange;
+  let interrupted = false;
+  vi.spyOn(h.sheet, "getRange").mockImplementation((...args) => {
+    const range = original(...args);
+    if (!interrupted && args[0] === 2 && args[1] === 1) {
+      interrupted = true;
+      return {
+        ...range,
+        setValues: () => {
+          throw new Error("Storage interrupted");
+        },
+      };
+    }
+    return range;
+  });
+  expect(h.post(body).accepted).toBe(false);
+  expect(h.receiptRows[1][3]).toBe("Pending");
+  expect(h.sendEmail).not.toHaveBeenCalled();
+  expect(h.post(body).accepted).toBe(true);
+  expect(h.rows).toHaveLength(2);
+  expect(h.receiptRows).toHaveLength(2);
+  expect(h.receiptRows[1][3]).toBe("Saved");
+  expect(h.post(body).duplicate).toBe(true);
   expect(h.sendEmail).toHaveBeenCalledOnce();
 });

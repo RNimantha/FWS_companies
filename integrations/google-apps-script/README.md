@@ -29,13 +29,19 @@ The optional manifest can be pasted into `appsscript.json` after enabling manife
 
 ## Saved columns
 
-Submitted At, Request ID, Payload Hash, Full Name, Phone, Email, Service Code, Service Required, ZIP Code, Message, Status, Preferred Contact, Property Type.
+Submitted At, Full Name, Phone, Email, Service Code, Service Required, ZIP Code, Message, Status, Preferred Contact, Property Type.
 
 Email is optional when Phone is selected and required when Email is selected. Property type is required and accepts Single Family, Multi Family, Commercial, Institutional or HOA. Every customer-entered field is saved, including an optional blank email. The honeypot is validated and intentionally not stored. Timestamp and `New` status are added automatically. Phone and ZIP are text to preserve leading zeros. Formula-like customer strings are escaped as literal text.
 
-The website backend also includes preferred contact and property type in the Message column, so the existing deployed receiver preserves these choices immediately. To get separate columns, paste the updated `Code.gs` into the existing Apps Script project and update its web-app deployment to a new version, keeping the same URL and Script Properties. The receiver appends the two headers to the existing 11-column layout without changing historical rows; running `setupSheet` performs the same safe migration. Existing rows have blank values in the new columns. Do not reorder or rename internal columns.
+The website backend also includes preferred contact and property type in Message for compatibility with older deployed receivers. The current receiver stores them in dedicated columns too.
 
-Request ID is the browser's existing Idempotency-Key. A script lock serializes lookup and append. An identical retry returns success without a second row; a changed payload using the same ID is rejected. Duplicate protection lasts while the row/ID remains in this tab. Archive rather than delete IDs if retries must continue to deduplicate. Do not manually edit Request ID or Payload Hash.
+### Remove Request ID and Payload Hash from the leads tab
+
+Do not delete those columns manually. Paste the updated `Code.gs`, save, and update the **existing** web-app deployment to a new version, keeping the same URL and Script Properties. Then run **setupSheet** once. It copies historical IDs/hashes into a hidden tab named `Website Leads - Internal Receipts` (or your configured sheet name plus ` - Internal Receipts`) before deleting columns B and C from the visible leads tab. Customer data and existing notes move with their columns. The migration also accepts the older 11-column layout and adds Preferred Contact and Property Type when needed. Historical values for those two selections stay blank. New submissions perform the same migration automatically if setup was not run. A conflicting or missing historical receipt stops migration before columns are deleted.
+
+The internal tab contains Request ID, Payload Hash, Lead Row and State. Hiding is for presentation, not access control: spreadsheet editors can unhide it. Keep the entire spreadsheet private. Do not delete or modify internal receipts, rename tabs/headers, or sort or move rows during migration or while an interrupted write is pending.
+
+Request ID is the browser’s existing Idempotency-Key. A script lock serializes lookup, reservation and save. An identical retry returns success without a second row; a changed payload using the same ID is rejected. Pending internal receipts reserve the lead row before writing, so an interrupted write can resume at that same row. A receipt becomes Saved only after the lead row is flushed. Keep the internal tab even when archiving old lead rows; its Saved receipts prevent repeat submissions from recreating archived leads. Email notifications only run after a newly completed save, not for duplicate saved receipts.
 
 ## Website backend connection
 
@@ -80,7 +86,7 @@ References: [Google web-app deployment](https://developers.google.com/apps-scrip
 
 ## Branded lead emails
 
-After saving each new lead, the receiver sends an HTML notification with a plain-text fallback to **nimantabandara@gmail.com**. If the customer supplied an email, it also sends a matching confirmation. Both templates use the FWC black, red, white and silver identity and display all submitted fields. The customer template does not include the private Sheet link. Customer-entered HTML is escaped.
+After saving each new lead, the receiver sends an HTML notification with a plain-text fallback to **nimantabandara@gmail.com**. If the customer supplied an email, it also sends a matching confirmation. Both templates use the FWC black, red, white and silver identity and display all submitted fields. The team template includes Reply to lead (when an email is supplied) and Call now buttons that open the customer’s email address or phone number. Neither email includes a private Sheet link. Customer-entered HTML is escaped.
 
 ### Enable on the existing deployment
 
