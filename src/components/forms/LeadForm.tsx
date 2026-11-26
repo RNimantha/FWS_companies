@@ -52,7 +52,7 @@ export function LeadForm({ selected }: { selected: string }) {
     try {
       await submitLead({ ...values, message: "" }, key.current);
       setSuccess(true);
-      track("lead_form_success", "estimate");
+      track("lead_form_success", "estimate", key.current);
     } catch (e) {
       setStatus(
         e instanceof Error ? e.message : "Please call us to request help.",
@@ -73,9 +73,15 @@ export function LeadForm({ selected }: { selected: string }) {
   return (
     <form
       onSubmit={handleSubmit(send)}
-      onFocus={() => {
+      onFocus={(event) => {
+        if (!(
+          event.target instanceof HTMLInputElement ||
+          event.target instanceof HTMLSelectElement ||
+          event.target instanceof HTMLTextAreaElement
+        ))
+          return;
         if (!started.current) {
-          track("lead_form_start", "estimate");
+          track("lead_form_start", "estimate", key.current);
           started.current = true;
         }
       }}

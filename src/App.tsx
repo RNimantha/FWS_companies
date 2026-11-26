@@ -1,3 +1,4 @@
+import { MarketingConsent } from "./components/privacy/MarketingConsent";
 import { useState } from "react";
 import {
   ArrowUpRight,
@@ -257,6 +258,7 @@ export default function App() {
       </main>
       <Footer />
       <StickyConversionBar />
+      <MarketingConsent />
     </MotionProvider>
   );
 }

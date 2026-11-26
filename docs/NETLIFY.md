@@ -34,3 +34,7 @@ The function uses existing server validation, a bounded request body, honeypot a
 Automated tests use a fake Google transport and exercise the actual Netlify handler. After deployment, check the route before sending a clearly labeled test lead, then confirm the row and a retry receipt. Local tests cannot establish that Netlify runtime secrets are correct.
 
 Official references: [custom function paths](https://docs.netlify.com/build/functions/configuration/), [Functions environment variables](https://docs.netlify.com/build/functions/environment-variables/), [rate limiting](https://docs.netlify.com/manage/security/secure-access-to-sites/rate-limiting/).
+
+## Meta Pixel
+
+Marketing consent and Pixel configuration are documented in [META-PIXEL.md](META-PIXEL.md). The public Pixel ID defaults to `4096193424023864`. Production tracking is enabled only on the exact origin `https://fwccompanies.services` in production builds and only after consent. Optional `VITE_META_PIXEL_ID`, `VITE_META_PIXEL_ENABLED` and `VITE_META_PIXEL_TEST_MODE` use **Builds** scope and require a rebuild. Leave test mode false in production and ordinary deploy previews. Existing Functions/Google settings are unchanged.

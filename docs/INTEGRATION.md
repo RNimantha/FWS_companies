@@ -16,7 +16,7 @@ Before enabling the endpoint:
 - Approve privacy policy and processor disclosures; replace the interim footer notice.
 
 ## Advertising
-`fwc:analytics` is a local-only CustomEvent readiness hook with event name and placement. It neither persists nor transmits data. An approved consent adapter can forward allowlisted events. Never forward form fields, raw URLs or query strings. Implement consent-controlled allowlisted UTM/ad-ID capture and retention only with client approval. Count accepted leads once; telephone clicks do not prove completed calls. page_view and vendor mappings remain to be configured.
+Meta Pixel `4096193424023864` now maps the existing form hooks and delegated CTA/telephone clicks through explicit marketing consent. The SDK loads only after opt-in, and defaults to production builds on `https://fwccompanies.services`. No form values are forwarded. See [META-PIXEL.md](META-PIXEL.md) for event mapping, testing overrides, account settings, privacy review and verification. Earlier statements that no tracking vendor is installed are superseded by this integration. The local `fwc:analytics` event remains available; only its first-interaction and confirmed-success hooks forward to Meta. Consent-controlled additional UTM/ad-ID capture is not implemented.
 
 ## Content and launch confirmations
 TODO: Client confirmation required — CSLB/license classes, BBB/current accreditation, certificates and badge rights, exact service coverage, restoration/hazardous-material scope, public business address, warranties, response-time claims, financing and free offers. These claims are not promoted in this build.
