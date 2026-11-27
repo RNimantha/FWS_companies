@@ -24,7 +24,7 @@ export function HeroSection() {
             <CallButton
               location="hero"
               className="hero-call"
-              label="Call 714-410-2728"
+              label={`Call ${business.phone}`}
             />
           </div>
           <div className="hero-proof">

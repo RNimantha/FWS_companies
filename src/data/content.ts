@@ -8,7 +8,7 @@ import {
   Siren,
 } from "lucide-react";
 export const business = {
-  phone: "714-410-2728",
+  phone: "+1 714-410-2728",
   tel: "tel:+17144102728",
   email: "robert@fwccompanies.com",
   address: "2007 E Miraloma Ave, Placentia, CA 92870",
@@ -192,7 +192,7 @@ export const faqs = [
   ],
   [
     "Can I call outside regular business hours?",
-    "Yes. We offer 24/7 service. Call 714-410-2728 to discuss your issue, location and current availability.",
+    "Yes. We offer 24/7 service. Call +1 714-410-2728 to discuss your issue, location and current availability.",
   ],
   [
     "Do you work with property managers?",
